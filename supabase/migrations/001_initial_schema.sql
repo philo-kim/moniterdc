@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For text search
 
 -- Create custom types
-CREATE TYPE gallery_type AS ENUM ('minjoo', 'kukmin', 'politics', 'other');
+CREATE TYPE gallery_type AS ENUM ('minjoo', 'uspolitics', 'other');
 CREATE TYPE alert_severity AS ENUM ('critical', 'high', 'medium', 'low', 'info');
 CREATE TYPE analysis_status AS ENUM ('pending', 'processing', 'completed', 'failed');
 CREATE TYPE job_status AS ENUM ('queued', 'running', 'completed', 'failed', 'cancelled');

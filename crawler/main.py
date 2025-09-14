@@ -34,22 +34,20 @@ DEBUG_MODE = os.getenv('DEBUG_MODE', 'false').lower() == 'true'
 # DC갤러리 설정
 DC_GALLERIES = {
     'minjoo': {
-        'id': 'minjoo_party',
-        'name': '민주당 갤러리',
-        'base_url': 'https://gall.dcinside.com/board/lists',
-        'gallery_type': 'minjoo'
+        'id': 'minjudang',
+        'name': '민주당 갤러리 (개념글)',
+        'base_url': 'https://gall.dcinside.com/mgallery/board/lists',
+        'gallery_type': 'minjoo',
+        'is_mgallery': True,
+        'params': {'exception_mode': 'recommend'}
     },
-    'kukmin': {
-        'id': 'president_park2', 
-        'name': '국민의힘 갤러리',
-        'base_url': 'https://gall.dcinside.com/board/lists',
-        'gallery_type': 'kukmin'
-    },
-    'politics': {
-        'id': 'politics',
-        'name': '정치 갤러리',
-        'base_url': 'https://gall.dcinside.com/board/lists',
-        'gallery_type': 'politics'
+    'uspolitics': {
+        'id': 'uspolitics',
+        'name': '미국정치 갤러리 (개념글)',
+        'base_url': 'https://gall.dcinside.com/mgallery/board/lists',
+        'gallery_type': 'uspolitics',
+        'is_mgallery': True,
+        'params': {'exception_mode': 'recommend'}
     }
 }
 
@@ -123,13 +121,25 @@ class DCGalleryCrawler:
         """게시글 목록 파싱"""
         soup = BeautifulSoup(html, 'html.parser')
         posts = []
-        
-        # 개념글 박스 찾기
-        concept_posts = soup.select('.us-post')  # 개념글
-        general_posts = soup.select('.ub-content')  # 일반글
-        
-        all_posts = concept_posts[:5] + general_posts[:10]  # 개념글 5개 + 일반글 10개
-        
+
+        # 개념글 게시판과 일반 게시판의 구조가 다를 수 있음
+        if gallery_info.get('params', {}).get('exception_mode') == 'recommend':
+            # 개념글 게시판 파싱 (추천 게시글만)
+            post_elements = soup.select('.us-post')  # 개념글
+            if not post_elements:
+                # 다른 선택자 시도
+                post_elements = soup.select('tr.ub-content')
+
+            # 개념글은 모든 글을 가져옴 (최대 20개)
+            all_posts = post_elements[:20]
+        else:
+            # 일반 게시판 파싱
+            concept_posts = soup.select('.us-post')  # 개념글
+            general_posts = soup.select('.ub-content')  # 일반글
+            all_posts = concept_posts[:5] + general_posts[:10]  # 개념글 5개 + 일반글 10개
+
+        logger.info(f"Found {len(all_posts)} post elements in {gallery_info['name']}")
+
         for post_elem in all_posts:
             try:
                 post_data = self.extract_post_data(post_elem, gallery_info)
@@ -138,7 +148,7 @@ class DCGalleryCrawler:
             except Exception as e:
                 logger.error(f"Error parsing post: {str(e)}")
                 continue
-        
+
         return posts
     
     def extract_post_data(self, post_elem, gallery_info: Dict) -> Optional[Dict]:
@@ -156,7 +166,17 @@ class DCGalleryCrawler:
                 return None
             
             title = title_elem.text.strip()
-            post_url = urljoin('https://gall.dcinside.com', title_elem.get('href', ''))
+            href = title_elem.get('href', '')
+
+            # mgallery와 일반 갤러리의 URL 구조가 다름
+            if gallery_info.get('is_mgallery', False):
+                # mgallery URL 처리
+                if href.startswith('/'):
+                    post_url = f"https://gall.dcinside.com{href}"
+                else:
+                    post_url = href
+            else:
+                post_url = urljoin('https://gall.dcinside.com', href)
             
             # 작성자
             author_elem = post_elem.select_one('.gall_writer')
@@ -290,8 +310,14 @@ class DCGalleryCrawler:
         
         logger.info(f"Crawling {gallery_info['name']}...")
         
-        # 갤러리 목록 페이지 URL
-        list_url = f"{gallery_info['base_url']}?id={gallery_info['id']}"
+        # 갤러리 목록 페이지 URL 생성
+        params = {'id': gallery_info['id']}
+        if gallery_info.get('params'):
+            params.update(gallery_info['params'])
+
+        # URL 파라미터 생성
+        param_string = '&'.join([f"{k}={v}" for k, v in params.items()])
+        list_url = f"{gallery_info['base_url']}?{param_string}"
         
         # 페이지 가져오기
         html = await self.fetch_page(list_url)
