@@ -1,0 +1,31 @@
+{
+  "name": "dc-monitor-system",
+  "version": "1.0.0",
+  "description": "DC Gallery Political Monitoring System",
+  "private": true,
+  "scripts": {
+    "setup": "bash setup.sh",
+    "crawler": "python crawler/main.py",
+    "dashboard:dev": "cd dashboard && npm run dev",
+    "dashboard:build": "cd dashboard && npm run build",
+    "test:crawler": "python -m pytest crawler/tests/",
+    "lint": "python -m pylint crawler/",
+    "format": "python -m black crawler/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/moniterdc.git"
+  },
+  "keywords": [
+    "monitoring",
+    "politics",
+    "ai",
+    "crawler",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  }
+}
