@@ -1,0 +1,389 @@
+name: Logic Defense System v3
+
+on:
+  schedule:
+    # 크롤링: 10분마다
+    - cron: '*/10 * * * *'
+  
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all           # 전체 실행
+          - crawl         # 크롤링만
+          - match         # 매칭만
+          - alert         # 알림만
+          - health        # 헬스체크
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # =======================================
+  # Job 1: 시스템 헬스체크
+  # =======================================
+  health_check:
+    name: System Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install minimal dependencies
+      run: |
+        pip install supabase python-dotenv
+    
+    - name: Check system health
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python scheduler/background_matcher_fixed.py --health
+    
+    - name: Report health status
+      if: always()
+      run: |
+        echo "## 🏥 System Health Check" >> $GITHUB_STEP_SUMMARY
+        echo "Time: $(date)" >> $GITHUB_STEP_SUMMARY
+
+  # =======================================
+  # Job 2: 크롤링 & AI 분석 & 벡터화
+  # =======================================
+  crawl_and_vectorize:
+    name: Crawl & Vectorize Logic
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: health_check
+    if: ${{ github.event.inputs.mode != 'match' && github.event.inputs.mode != 'alert' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run Logic Crawler (Fixed)
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GPT_ANALYSIS_MODEL: gpt-5
+        GPT_FILTER_MODEL: gpt-5-mini
+        GPT_STRATEGY_MODEL: gpt-5
+      run: |
+        python logic_crawler_fixed.py
+    
+    - name: Generate crawl report
+      if: always()
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        echo "## 📊 Crawling Report" >> $GITHUB_STEP_SUMMARY
+        echo "Time: $(date)" >> $GITHUB_STEP_SUMMARY
+        python -c "
+        from supabase import create_client
+        import os
+        from datetime import datetime, timedelta
+        
+        supabase = create_client(
+            os.getenv('SUPABASE_URL'),
+            os.getenv('SUPABASE_SERVICE_KEY')
+        )
+        
+        # 최근 1시간 통계
+        since = (datetime.now() - timedelta(hours=1)).isoformat()
+        
+        new_logics = supabase.table('logic_repository').select('logic_type, vector_embedding').gte(
+            'created_at', since
+        ).execute()
+        
+        if new_logics.data:
+            attacks = len([l for l in new_logics.data if l['logic_type'] == 'attack'])
+            defenses = len([l for l in new_logics.data if l['logic_type'] == 'defense'])
+            with_vectors = len([l for l in new_logics.data if l.get('vector_embedding')])
+            
+            print(f'### New Logics (Last Hour)')
+            print(f'- 🔴 Attacks: {attacks}')
+            print(f'- 🛡️ Defenses: {defenses}')
+            print(f'- 📍 With Vectors: {with_vectors}/{len(new_logics.data)}')
+        else:
+            print('No new logics in the last hour')
+        " >> $GITHUB_STEP_SUMMARY
+
+  # =======================================
+  # Job 3: 공격-방어 매칭
+  # =======================================
+  attack_defense_matching:
+    name: Attack-Defense Matching
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: crawl_and_vectorize
+    if: ${{ always() && github.event.inputs.mode != 'crawl' && github.event.inputs.mode != 'alert' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run attack-defense matcher
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python scheduler/background_matcher_fixed.py --once
+    
+    - name: Generate matching report
+      if: always()
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        echo "## 🎯 Matching Report" >> $GITHUB_STEP_SUMMARY
+        echo "Time: $(date)" >> $GITHUB_STEP_SUMMARY
+        python -c "
+        from supabase import create_client
+        import os
+        from datetime import datetime, timedelta
+        
+        supabase = create_client(
+            os.getenv('SUPABASE_URL'),
+            os.getenv('SUPABASE_SERVICE_KEY')
+        )
+        
+        # 최근 매칭
+        since = (datetime.now() - timedelta(minutes=15)).isoformat()
+        
+        new_matches = supabase.table('logic_matches').select('match_confidence').gte(
+            'created_at', since
+        ).execute()
+        
+        if new_matches.data:
+            avg_conf = sum(m['match_confidence'] for m in new_matches.data) / len(new_matches.data)
+            high_conf = len([m for m in new_matches.data if m['match_confidence'] >= 0.8])
+            
+            print(f'### New Matches (Last 15 min)')
+            print(f'- Total: {len(new_matches.data)}')
+            print(f'- Avg Confidence: {avg_conf:.0%}')
+            print(f'- High Confidence (>80%): {high_conf}')
+        else:
+            print('No new matches')
+        
+        # 미매칭 공격
+        unmatched = supabase.rpc('get_unmatched_attacks', {'limit_count': 100}).execute()
+        if unmatched.data:
+            critical = len([a for a in unmatched.data if a.get('threat_level', 0) >= 8])
+            print(f'')
+            print(f'### Unmatched Attacks')
+            print(f'- Total: {len(unmatched.data)}')
+            print(f'- Critical (threat >= 8): {critical}')
+        " >> $GITHUB_STEP_SUMMARY
+
+  # =======================================
+  # Job 4: 텔레그램 알림 발송
+  # =======================================
+  send_telegram_alerts:
+    name: Send Telegram Alerts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: attack_defense_matching
+    if: ${{ always() && github.event.inputs.mode != 'crawl' && github.event.inputs.mode != 'match' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        pip install python-telegram-bot supabase python-dotenv
+    
+    - name: Send priority alerts
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python alert_sender_v3.py
+    
+    - name: Alert summary
+      if: always()
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        echo "## 📨 Alert Summary" >> $GITHUB_STEP_SUMMARY
+        python -c "
+        from supabase import create_client
+        import os
+        from datetime import datetime, timedelta
+        
+        supabase = create_client(
+            os.getenv('SUPABASE_URL'),
+            os.getenv('SUPABASE_SERVICE_KEY')
+        )
+        
+        # 최근 발송 알림
+        since = (datetime.now() - timedelta(minutes=15)).isoformat()
+        
+        sent = supabase.table('alerts').select('severity').gte(
+            'sent_at', since
+        ).execute()
+        
+        if sent.data:
+            by_severity = {}
+            for alert in sent.data:
+                sev = alert['severity']
+                by_severity[sev] = by_severity.get(sev, 0) + 1
+            
+            print(f'### Alerts Sent (Last 15 min)')
+            for sev in ['critical', 'high', 'medium', 'low']:
+                if sev in by_severity:
+                    print(f'- {sev.upper()}: {by_severity[sev]}')
+        else:
+            print('No alerts sent')
+        " >> $GITHUB_STEP_SUMMARY
+
+  # =======================================
+  # Job 5: 일일 종합 리포트 (매일 오전 9시)
+  # =======================================
+  daily_report:
+    name: Daily Performance Report
+    runs-on: ubuntu-latest
+    if: ${{ github.event.schedule == '0 0 * * *' }}  # UTC 0시 = KST 9시
+    
+    steps:
+    - name: Generate and send daily report
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python -c "
+        from supabase import create_client
+        import os
+        import asyncio
+        from datetime import datetime, timedelta
+        from telegram import Bot
+        
+        supabase = create_client(
+            os.getenv('SUPABASE_URL'),
+            os.getenv('SUPABASE_SERVICE_KEY')
+        )
+        
+        # 24시간 통계
+        since = (datetime.now() - timedelta(days=1)).isoformat()
+        
+        # 논리 수집
+        logics = supabase.table('logic_repository').select('logic_type, vector_embedding').gte(
+            'created_at', since
+        ).execute()
+        
+        attacks = len([l for l in logics.data if l['logic_type'] == 'attack'])
+        defenses = len([l for l in logics.data if l['logic_type'] == 'defense'])
+        with_vectors = len([l for l in logics.data if l.get('vector_embedding')])
+        
+        # 매칭
+        matches = supabase.table('logic_matches').select('match_confidence').gte(
+            'created_at', since
+        ).execute()
+        
+        avg_conf = sum(m['match_confidence'] for m in matches.data) / len(matches.data) if matches.data else 0
+        
+        # 알림
+        alerts = supabase.table('alerts').select('severity').gte(
+            'sent_at', since
+        ).execute()
+        
+        critical_alerts = len([a for a in alerts.data if a['severity'] == 'critical']) if alerts.data else 0
+        
+        report = f'''
+📊 **Logic Defense 일일 리포트**
+{datetime.now().strftime('%Y-%m-%d')}
+
+**수집 현황 (24h)**
+• 🔴 공격 논리: {attacks}개
+• 🛡️ 방어 논리: {defenses}개
+• 📍 벡터화 완료: {with_vectors}/{len(logics.data) if logics.data else 0}
+
+**매칭 성과**
+• 새 매칭: {len(matches.data) if matches.data else 0}개
+• 평균 확신도: {avg_conf:.0%}
+
+**알림 발송**
+• 총 알림: {len(alerts.data) if alerts.data else 0}개
+• 긴급 알림: {critical_alerts}개
+
+#일일리포트 #LogicDefense
+        '''
+        
+        # 텔레그램 발송
+        bot = Bot(token=os.getenv('TELEGRAM_BOT_TOKEN'))
+        
+        async def send():
+            await bot.send_message(
+                chat_id=os.getenv('TELEGRAM_CHAT_ID'),
+                text=report,
+                parse_mode='Markdown'
+            )
+        
+        asyncio.run(send())
+        print(report)
+        "
+
+  # =======================================
+  # Job 6: 오류 복구 (실패시 실행)
+  # =======================================
+  error_recovery:
+    name: Error Recovery
+    runs-on: ubuntu-latest
+    needs: [crawl_and_vectorize, attack_defense_matching]
+    if: failure()
+    
+    steps:
+    - name: Send error alert
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+      run: |
+        curl -X POST \
+          "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d "chat_id=${TELEGRAM_CHAT_ID}" \
+          -d "text=⚠️ Logic Defense System Error%0A%0AWorkflow failed at $(date)%0ACheck GitHub Actions for details"
