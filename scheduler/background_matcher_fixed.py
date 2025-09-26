@@ -53,7 +53,7 @@ class BackgroundMatcher:
             
             if stats.data:
                 total_logics = sum(s['total_count'] for s in stats.data)
-                with_embedding = sum(s['with_embedding'] for s in stats.data)
+                with_embedding = sum(s['embedded_count'] for s in stats.data)
                 embedding_rate = with_embedding / total_logics if total_logics > 0 else 0
             else:
                 total_logics = 0

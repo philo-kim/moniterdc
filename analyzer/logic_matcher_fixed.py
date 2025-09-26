@@ -27,6 +27,16 @@ SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 
+def safe_json_loads(text, default=None):
+    """안전한 JSON 파싱"""
+    if not text or text.strip() == '':
+        return default or {}
+    try:
+        return json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return default or {}
+
+
 class MatchConfidence(Enum):
     """매칭 확신도 레벨"""
     PERFECT = "perfect"      # 90% 이상
@@ -108,10 +118,11 @@ class LogicDefenseMatcher:
         
         # 1. 벡터 임베딩이 있는 경우 벡터 검색
         if attack.get('vector_embedding'):
-            defenses = await self._vector_search_defenses(attack['vector_embedding'], limit * 2)
+            defenses = await self._vector_search_defenses(attack['vector_embedding'], limit * 2, attack.get('id'))
         else:
             # 2. 임베딩이 없으면 카테고리/키워드 기반 검색
-            category = attack.get('ai_classification', {}).get('category')
+            ai_class = safe_json_loads(attack.get('ai_classification'))
+            category = ai_class.get('category') if ai_class else None
             defenses = await self.get_available_defenses(category)
         
         if not defenses:
@@ -124,18 +135,22 @@ class LogicDefenseMatcher:
         # 4. 상위 N개 선택
         return scored_defenses[:limit]
     
-    async def _vector_search_defenses(self, attack_embedding: List[float], limit: int) -> List[Dict]:
+    async def _vector_search_defenses(self, attack_embedding: List[float], limit: int, attack_logic_id: str = None) -> List[Dict]:
         """벡터 유사도 기반 방어 논리 검색"""
         try:
-            # PostgreSQL 함수 호출
-            result = self.supabase.rpc(
-                'find_defense_for_attack',
-                {
-                    'attack_embedding': attack_embedding,
-                    'min_similarity': 0.6,
-                    'max_results': limit
-                }
-            ).execute()
+            # PostgreSQL 함수 호출 (올바른 파라미터 사용)
+            if attack_logic_id:
+                result = self.supabase.rpc(
+                    'find_defense_for_attack',
+                    {
+                        'attack_logic_id': attack_logic_id,
+                        'confidence_threshold': 0.6,
+                        'max_results': limit
+                    }
+                ).execute()
+            else:
+                # 벡터 기반 검색은 수동으로 처리
+                result = None
             
             if result.data:
                 return result.data
@@ -144,12 +159,18 @@ class LogicDefenseMatcher:
             all_defenses = await self.get_available_defenses()
             
             # 코사인 유사도 계산
-            attack_vec = np.array(attack_embedding)
+            # 벡터가 문자열인 경우 JSON 파싱
+            if isinstance(attack_embedding, str):
+                attack_embedding = safe_json_loads(attack_embedding, [])
+            attack_vec = np.array(attack_embedding, dtype=np.float32)
             similarities = []
-            
+
             for defense in all_defenses:
                 if defense.get('vector_embedding'):
-                    defense_vec = np.array(defense['vector_embedding'])
+                    defense_embedding = defense['vector_embedding']
+                    if isinstance(defense_embedding, str):
+                        defense_embedding = safe_json_loads(defense_embedding, [])
+                    defense_vec = np.array(defense_embedding, dtype=np.float32)
                     similarity = np.dot(attack_vec, defense_vec) / (
                         np.linalg.norm(attack_vec) * np.linalg.norm(defense_vec)
                     )
@@ -177,7 +198,7 @@ class LogicDefenseMatcher:
 - 핵심: {attack['core_argument']}
 - 키워드: {', '.join(attack.get('keywords', []))}
 - 위협도: {attack.get('threat_level', 0)}/10
-- 카테고리: {attack.get('ai_classification', {}).get('category', '일반')}
+- 카테고리: {safe_json_loads(attack.get('ai_classification')).get('category', '일반')}
 
 **방어 논리 목록:**
 {json.dumps([{
@@ -343,12 +364,10 @@ JSON 형식:
 """
             
             alert_data = {
-                'post_id': None,
-                'analysis_id': attack['id'],
+                'alert_type': 'attack_defense_match',
                 'severity': severity,
                 'title': f"[{severity.upper()}] 공격 논리 매칭: {attack['core_argument'][:30]}...",
                 'message': message,
-                'alert_type': 'attack_defense_match',
                 'metadata': {
                     'attack_id': attack['id'],
                     'defense_id': defense['id'],
@@ -356,7 +375,8 @@ JSON 형식:
                     'strategy_type': defense.get('strategy_type'),
                     'threat_level': attack.get('threat_level', 0),
                     'additional_defenses': len(matches) - 1
-                }
+                },
+                'send_channel': 'telegram'
             }
             
             self.supabase.table('alerts').insert(alert_data).execute()
@@ -389,18 +409,17 @@ JSON 형식:
 """
             
             alert_data = {
-                'post_id': None,
-                'analysis_id': attack['id'],
+                'alert_type': 'no_defense_available',
                 'severity': 'critical',
                 'title': f"[CRITICAL] 무방비 공격: {attack['core_argument'][:30]}...",
                 'message': message,
-                'alert_type': 'no_defense_available',
                 'metadata': {
                     'attack_id': attack['id'],
                     'threat_level': attack.get('threat_level', 0),
                     'keywords': attack.get('keywords', []),
                     'requires_immediate_action': True
-                }
+                },
+                'send_channel': 'telegram'
             }
             
             self.supabase.table('alerts').insert(alert_data).execute()
@@ -482,17 +501,16 @@ JSON 형식:
 """
             
             alert_data = {
-                'post_id': None,
-                'analysis_id': None,
+                'alert_type': 'daily_report',
                 'severity': 'low',
                 'title': f"매칭 리포트: {total}건 처리 완료",
                 'message': message,
-                'alert_type': 'daily_report',
                 'metadata': {
                     'total_matches': total,
                     'avg_confidence': avg_confidence,
                     'strategy_distribution': strategies
-                }
+                },
+                'send_channel': 'telegram'
             }
             
             self.supabase.table('alerts').insert(alert_data).execute()
