@@ -544,7 +544,7 @@ export default function WorldviewDetailPage() {
                   <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4">
                     <p className="text-xs text-blue-600 font-medium mb-2">예시 응답</p>
                     <p className="text-sm text-blue-900 leading-relaxed">
-                      "{dec.dialogue_guide.example_response}"
+                      &ldquo;{dec.dialogue_guide.example_response}&rdquo;
                     </p>
                   </div>
                 </div>

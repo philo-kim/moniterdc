@@ -127,7 +127,7 @@ export function WorldviewCard({ worldview }: WorldviewCardProps) {
 
       {/* Frame */}
       <div className="px-4 py-3 bg-gray-50 text-sm text-gray-700 italic border-b border-gray-200">
-        "{worldview.frame}"
+        &ldquo;{worldview.frame}&rdquo;
       </div>
 
       {/* Strength Meters */}
