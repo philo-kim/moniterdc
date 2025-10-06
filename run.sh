@@ -78,17 +78,16 @@ run_crawler() {
     python3 logic_crawler_fixed.py
 }
 
-# 매칭 실행 (1회)
+# 매칭 실행 (제거됨 - 이제 크라우드소싱 방식 사용)
 run_matcher_once() {
-    echo -e "${YELLOW}🎯 매칭 시스템 실행 (1회)...${NC}"
-    python3 scheduler/background_matcher_fixed.py --once
+    echo -e "${RED}❌ 자동 매칭 시스템은 제거되었습니다${NC}"
+    echo -e "${YELLOW}💡 대시보드(http://localhost:3000)에서 수동으로 대응하세요${NC}"
 }
 
-# 매칭 실행 (지속)
+# 매칭 실행 (제거됨)
 run_matcher_loop() {
-    echo -e "${YELLOW}🎯 매칭 시스템 실행 (지속)...${NC}"
-    echo -e "${YELLOW}종료하려면 Ctrl+C를 누르세요.${NC}"
-    python3 scheduler/background_matcher_fixed.py
+    echo -e "${RED}❌ 자동 매칭 시스템은 제거되었습니다${NC}"
+    echo -e "${YELLOW}💡 대시보드(http://localhost:3000)에서 수동으로 대응하세요${NC}"
 }
 
 # 알림 발송

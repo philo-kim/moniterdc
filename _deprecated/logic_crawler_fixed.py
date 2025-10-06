@@ -28,7 +28,7 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-# DC갤러리 설정
+# DC갤러리 설정 (공격 논리만 수집)
 GALLERIES = {
     'uspolitics': {
         'id': 'uspolitics',
@@ -36,14 +36,8 @@ GALLERIES = {
         'logic_type': 'attack',
         'url': 'https://gall.dcinside.com/mgallery/board/lists',
         'is_mgallery': True
-    },
-    'minjoo': {
-        'id': 'minjudang',
-        'name': '민주당',
-        'logic_type': 'defense',
-        'url': 'https://gall.dcinside.com/mgallery/board/lists',
-        'is_mgallery': True
     }
+    # 방어 논리는 이제 사용자가 대시보드에서 직접 작성
 }
 
 USER_AGENTS = [
@@ -183,7 +177,7 @@ class FixedLogicCrawler:
             content_elem = soup.select_one('.write_div') or soup.select_one('.writing_view_box')
             if content_elem:
                 content = content_elem.get_text(strip=True, separator='\n')
-                return content[:2000]  # 2000자 제한
+                return content  # 전체 본문 저장 (맥락 파악 위해)
 
         except Exception as e:
             logger.error(f"Error fetching content from {post_url}: {str(e)}")
@@ -202,19 +196,35 @@ class FixedLogicCrawler:
                 messages=[
                     {
                         'role': 'system',
-                        'content': '''당신은 한국 정치 논리 분석 전문가입니다. DC갤러리 개념글의 논증을 분석해서 **반드시 JSON 형식**으로만 응답하세요.
+                        'content': '''당신은 한국 정치 논리 분석 전문가입니다. DC갤러리 개념글을 분석하여 **이 글이 어떤 정치적 프레임/내러티브를 구성하는지** 파악하세요.
+
+**핵심 목적**: 이 글이 어떤 **왜곡된 세계관**을 만들어내는 데 기여하는가?
+
+정치적 프레임/내러티브 예시:
+- "민주당=친중=국가안보위협" → 중국인무비자, 중국인도망, 간첩의혹, 친중외교 등의 글들이 이 프레임 구성
+- "이재명=범죄자=민주당붕괴" → 김혜경쇼핑, 대장동의혹, 위증교사 등의 글들이 이 프레임 구성
+- "윤석열=국가수호자" → 안보강화, 북한대응, 동맹강화 등의 글들이 이 프레임 구성
+- "한국언론=편파=조작" → KBS편파, MBC왜곡, 언론개혁필요 등의 글들이 이 프레임 구성
 
 다음 JSON 구조로만 응답하세요:
 {
-  "core_argument": "핵심 논리를 한 문장으로",
+  "core_argument": "핵심 주장을 한 문장으로",
   "keywords": ["키워드1", "키워드2", "키워드3"],
   "ai_classification": "공격적/방어적/중립적",
   "evidence_quality": 5,
   "threat_level": 3,
-  "effectiveness_score": 7
+  "effectiveness_score": 7,
+  "political_frame": "이 글이 구성하는 정치적 프레임/내러티브 (예: 민주당=친중=안보위협, 이재명=범죄자, 윤석열=국가수호자, 한국언론=편파)",
+  "context_issue": "구체적 이슈/사건 (예: 중국인무비자, 김혜경쇼핑, KBS편파보도)",
+  "distortion_pattern": "사용된 왜곡 기법 (예: 맥락제거, 과장, 인신공격, 허위연관)"
 }
 
-분석 불가능하면 null을 반환하세요.'''
+**중요**:
+- political_frame: 여러 글들이 공유할 수 있는 **큰 내러티브/세계관**
+- context_issue: 이 글이 다루는 **구체적 사건/이슈**
+- 같은 political_frame을 가진 글들은 다른 context_issue를 다루더라도 같은 왜곡된 세계관을 구성함
+
+단순 욕설/조롱만 있고 구체적 주장이 없으면 null을 반환하세요.'''
                     },
                     {
                         'role': 'user',
@@ -255,10 +265,13 @@ class FixedLogicCrawler:
                 'evidence_quality': analysis.get('evidence_quality', 5),
                 'threat_level': analysis.get('threat_level', 3),
                 'original_title': post['title'],
-                'original_content': content[:1000],  # 1000자 제한
+                'original_content': content,  # 전체 본문 저장 (맥락 파악 위해)
                 'original_url': post['post_url'],
                 'original_post_num': post['post_num'],
                 'effectiveness_score': analysis.get('effectiveness_score', 5),
+                'political_frame': analysis.get('political_frame'),  # 정치적 프레임/내러티브
+                'context_issue': analysis.get('context_issue'),  # 관련 사건/이슈
+                'distortion_pattern': analysis.get('distortion_pattern'),  # 왜곡 패턴
                 'usage_count': 0,
                 'success_count': 0,
                 'is_active': True,
@@ -361,19 +374,19 @@ class FixedLogicCrawler:
 
         total_processed = 0
 
-        # 민주당 갤러리만 처리 (방어 논리 생성)
-        gallery_key = 'minjoo'
+        # 미국정치 갤러리 처리 (공격 논리 수집)
+        gallery_key = 'uspolitics'
         logger.info(f"\n{'='*60}")
         logger.info(f"🎯 {GALLERIES[gallery_key]['name']} 갤러리")
         logger.info(f"{'='*60}")
 
         try:
             # 개념글 수집
-            posts = await self.fetch_concept_posts(gallery_key, max_pages=3)
+            posts = await self.fetch_concept_posts(gallery_key, max_pages=5)
 
             if posts:
-                # 처리 (10개만)
-                processed = await self.process_posts(posts[:10])
+                # 처리 (20개)
+                processed = await self.process_posts(posts[:20])
                 total_processed += processed
                 logger.info(f"🎉 {GALLERIES[gallery_key]['name']}: {processed}개 완료")
             else:

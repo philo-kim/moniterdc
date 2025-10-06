@@ -1,278 +1,696 @@
-# 🤖 Logic Defense RAG System
+# DC Gallery 세계관 분석 시스템
 
-> **정치 논리 분석 및 대응 자동화 시스템**  
-> DC갤러리 정치 논리를 실시간으로 수집, 분석하고 LangChain RAG를 통해 최적의 대응 전략을 제시하는 AI 시스템
+> DC Inside 정치 커뮤니티 담론의 **세계관 구조**를 자동으로 분석하여, 일반인(특히 더불어민주당 지지자)이 상대방의 사고 체계를 이해할 수 있도록 돕는 AI 모니터링 시스템
 
-## ✨ v3.0 주요 업데이트 - LangChain/RAG 통합
-
-### 🎯 새로운 기능
-- **LangChain RAG 시스템**: 과거 논리 학습 및 컨텍스트 기반 대응
-- **벡터 검색**: Supabase pgvector를 활용한 유사 논리 매칭
-- **자동 매칭**: 공격 논리에 대한 방어 논리 자동 추천
-- **효과성 학습**: 실제 사용 결과를 바탕으로 한 베이지안 점수 업데이트
-- **트렌딩 분석**: 실시간 키워드 및 논리 패턴 분석
-- **대화 히스토리**: RAG 컨텍스트 유지 및 개선
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 
 ## 📋 목차
 
-1. [시스템 개요](#시스템-개요)
-2. [기술 스택](#기술-스택)
-3. [설치 가이드](#설치-가이드)
-4. [사용 방법](#사용-방법)
-5. [LangChain/RAG 아키텍처](#langchainrag-아키텍처)
-6. [API 문서](#api-문서)
-7. [대시보드](#대시보드)
-8. [자동화 설정](#자동화-설정)
+- [프로젝트 개요](#-프로젝트-개요)
+- [핵심 개념](#-핵심-개념)
+- [시스템 아키텍처](#-시스템-아키텍처)
+- [빠른 시작](#-빠른-시작)
+- [주요 기능](#-주요-기능)
+- [데이터 파이프라인](#-데이터-파이프라인)
+- [세계관 구조](#-세계관-구조)
+- [대시보드](#-대시보드)
+- [개발 가이드](#-개발-가이드)
 
-## 🎨 시스템 개요
+---
+
+## 🎯 프로젝트 개요
+
+### 누구를 위한 프로젝트인가?
+
+**일반인, 특히 더불어민주당 지지자**를 위한 도구입니다.
+- DC Inside 정치 커뮤니티의 담론이 "왜 저렇게 생각하는지" 이해하고 싶은 분
+- 온/오프라인에서 상대방과 대화할 때 맥락을 파악하고 싶은 분
+- 정치 담론의 심층 구조를 학습하고 싶은 분
+
+### 해결하려는 문제
+
+DC Inside의 정치 담론은 단순한 "의견"이 아닌 **체계적인 세계관**에 기반합니다. 이 세계관을 이해하지 못하면:
+- 표면적 주장만 반박해도 효과가 없음
+- 심층 믿음(deep beliefs)은 그대로 남음
+- 대화가 평행선을 그음
+
+### 우리의 접근
+
+**자동 모니터링 + 3-Layer 분석**을 통해 담론의 심층 구조를 파악하고, **계층형 세계관**으로 조직화하여 실시간으로 제시합니다.
+
+```
+표면층 (Explicit Claims)
+  ↓
+암묵층 (Implicit Assumptions)
+  ↓
+심층 (Deep Beliefs) ← 세계관의 핵심
+```
+
+### 핵심 가치
+
+1. **맥락 이해**: 왜 그렇게 생각하는지 구조적으로 이해
+2. **효과적 대화**: 심층 믿음을 인지한 대응 가능
+3. **데이터 기반**: GPT-4o를 활용한 대규모 분석
+
+---
+
+## 💡 핵심 개념
+
+### 세계관 (Worldview)이란?
+
+특정 집단이 공유하는 **해석 프레임워크**:
+
+```python
+{
+  "category": "민주당/좌파에 대한 인식",
+  "subcategory": "독재 재현",
+
+  "narrative": {
+    "summary": "민주당은 과거 독재 정권의 방식을 재현하고 있다",
+
+    "examples": [{
+      "case": "유심교체 정보 유출",
+      "dc_interpretation": "사찰을 통한 독재적 통치 시도",
+      "normal_interpretation": "정보 유출 사건",
+      "gap": "의도적 독재 vs 정보 문제"
+    }],
+
+    "logic_chain": "사찰 → 권력 장악 → 독재 사회"
+  },
+
+  "metadata": {
+    "core": {
+      "primary_subject": "민주당",
+      "primary_attribute": "독재적 성향"
+    },
+    "slippery_slope": {
+      "trigger": "사찰 사건",
+      "escalation": "권력 장악 시도",
+      "endpoint": "독재 사회"
+    },
+    "emotional_drivers": {
+      "primary": "불신",
+      "urgency_level": "높음"
+    }
+  }
+}
+```
+
+### 왜 세계관인가?
+
+| 기존 접근 | 세계관 접근 |
+|----------|-----------|
+| 개별 주장 반박 | 심층 믿음 이해 |
+| "그건 틀렸어" | "왜 그렇게 생각하는지 이해해" |
+| 효과 없음 | 효과적 대화 가능 |
+
+---
+
+## 🏗 시스템 아키텍처
+
+### 전체 플로우
 
 ```mermaid
 graph TB
-    A[DC갤러리] -->|크롤링| B[RAG Crawler]
-    B -->|텍스트 분석| C[LangChain RAG System]
-    C -->|벡터 임베딩| D[Supabase pgvector]
-    D -->|유사도 검색| E[Logic Matching]
-    E -->|전략 생성| F[Response Strategy]
-    F -->|알림| G[Telegram Bot]
-    F -->|시각화| H[React Dashboard]
-    
-    C -->|GPT-4o| I[OpenAI API]
-    C -->|임베딩| J[text-embedding-3-large]
+    A[DC Gallery] -->|크롤링| B[contents 테이블]
+    B -->|3-Layer 분석| C[layered_perceptions]
+    C -->|세계관 구성| D[worldviews]
+    D -->|매칭| E[perception_worldview_links]
+    E -->|시각화| F[Next.js 대시보드]
+
+    G[GPT-4o] -.->|분석| C
+    G -.->|구성| D
 ```
 
-## 🛠 기술 스택
+### 기술 스택
 
-### 핵심 기술
-- **LangChain**: RAG 파이프라인 및 체인 관리
-- **Supabase**: PostgreSQL + pgvector + Realtime
-- **OpenAI GPT-4o**: 논리 분석 및 전략 생성
-- **Python 3.11**: 비동기 처리 (asyncio)
-- **Next.js 14**: 실시간 대시보드
+**백엔드**
+- Python 3.11+ (asyncio)
+- OpenAI GPT-5 / GPT-5-mini
+- Supabase (PostgreSQL + pgvector)
 
-### 주요 라이브러리
-```python
-langchain>=0.1.0          # RAG 프레임워크
-langchain-openai>=0.0.5   # OpenAI 통합
-pgvector>=0.2.4          # 벡터 DB
-supabase>=2.3.0          # 데이터베이스
-```
+**프론트엔드**
+- Next.js 14 (App Router)
+- TypeScript
+- TailwindCSS
+- SWR (data fetching)
 
-## 📦 설치 가이드
+**인프라**
+- GitHub Actions (자동화)
+- Vercel (대시보드 배포)
 
-### 1. 저장소 클론
+---
+
+## 🚀 빠른 시작
+
+### 1. 환경 설정
+
 ```bash
+# 저장소 클론
 git clone https://github.com/yourusername/moniterdc.git
 cd moniterdc
-```
 
-### 2. Python 환경 설정
-```bash
+# Python 환경
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
 
-### 3. 환경변수 설정
-```bash
-cp .env.example .env
-# .env 파일 편집하여 API 키 입력
-```
-
-### 4. Supabase 마이그레이션
-```bash
-# Supabase 대시보드에서 SQL 실행
-# 1. pgvector 확장 설치
-CREATE EXTENSION IF NOT EXISTS vector;
-
-# 2. 마이그레이션 파일 실행
-# supabase/migrations/010_langchain_rag_system.sql 내용 실행
-```
-
-### 5. 대시보드 설치
-```bash
+# 대시보드 환경
 cd dashboard
 npm install
+```
+
+### 2. 환경변수 설정
+
+```bash
+# .env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-key
+SUPABASE_ANON_KEY=your-anon-key
+OPENAI_API_KEY=sk-proj-...
+
+# dashboard/.env.local
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 3. 데이터베이스 마이그레이션
+
+```bash
+# Supabase Dashboard에서 실행
+# supabase/migrations/*.sql 파일들을 순서대로 실행
+```
+
+### 4. 실행
+
+```bash
+# 데이터 수집 및 분석
+python phase1_collect_data.py      # 1. 크롤링
+python phase3_layered_analysis.py  # 2. 3-Layer 분석
+
+# 세계관 구성
+python -c "
+import asyncio
+from engines.analyzers.optimal_worldview_constructor import OptimalWorldviewConstructor
+
+async def main():
+    constructor = OptimalWorldviewConstructor()
+    await constructor.build_hierarchical_worldviews()
+
+asyncio.run(main())
+"
+
+# 대시보드 실행
+cd dashboard
 npm run dev
+# http://localhost:3000
 ```
 
-## 🚀 사용 방법
+---
 
-### RAG 크롤러 실행
-```bash
-# 기본 실행 (크롤링 + RAG 분석 + 매칭)
-python rag_crawler.py
+## 🎨 주요 기능
 
-# 특정 갤러리만 분석
-python rag_crawler.py --gallery uspolitics
+### 1. 3-Layer 분석
 
-# 테스트 모드
-python rag_crawler.py --test
-```
+**LayeredPerceptionExtractor**가 각 게시글을 3개 층으로 분석:
 
-### RAG 시스템 직접 사용
 ```python
-from rag_system.rag_logic_system import get_rag_system
-
-async def analyze_text():
-    rag = get_rag_system()
-    
-    # 논리 분석
-    result = await rag.analyze_logic(
-        text="정부의 경제 정책이 실패했다는 증거가 명확하다.",
-        metadata={'logic_type': 'attack', 'source': 'test'}
-    )
-    
-    # 대응 논리 찾기
-    counter = await rag.find_counter_logic(text)
-    print(counter['answer'])
-```
-
-## 🏗 LangChain/RAG 아키텍처
-
-### 1. 문서 처리 파이프라인
-```python
-텍스트 입력 → 청킹(1000자) → 임베딩 생성 → pgvector 저장
-```
-
-### 2. RAG 체인 구성
-```python
-History-Aware Retriever → Context 검색 → LLM 프롬프팅 → 응답 생성
-```
-
-### 3. 벡터 검색 전략
-- **유사도 임계값**: 0.7 이상
-- **검색 개수**: 상위 5개
-- **필터링**: logic_type, classification, effectiveness_score
-
-### 4. 효과성 학습 알고리즘
-```python
-# 베이지안 평균
-new_score = ((base_score * 10) + (success_count * 10)) / (10 + usage_count)
-```
-
-## 📊 대시보드
-
-### 접속 방법
-```
-http://localhost:3000
-```
-
-### 주요 기능
-- **실시간 모니터링**: WebSocket 기반 실시간 업데이트
-- **논리 분석**: 공격/방어 논리 상세 분석
-- **매칭 결과**: 신뢰도 기반 매칭 시각화
-- **트렌딩**: 키워드 및 논리 패턴 트렌드
-- **효과성 추적**: 사용 통계 및 성공률
-
-## ⚙️ 자동화 설정
-
-### GitHub Actions
-```yaml
-# .github/workflows/rag_system.yml
-- 매시간 자동 크롤링 및 분석
-- 6시간마다 트렌딩 분석
-- 자정 일일 리포트 생성
-- Telegram 알림 전송
-```
-
-### 로컬 스케줄러
-```bash
-# Crontab 설정
-0 * * * * cd /path/to/moniterdc && python rag_crawler.py
-```
-
-## 📡 API 문서
-
-### RAG 분석 API
-```python
-POST /api/analyze
 {
-  "text": "분석할 텍스트",
-  "logic_type": "attack|defense",
-  "metadata": {}
-}
-
-Response:
-{
-  "analysis": {
-    "core_argument": "핵심 논리",
-    "keywords": ["키워드1", "키워드2"],
-    "ai_classification": "공격적",
-    "effectiveness_score": 8
-  },
-  "counter_logic": "대응 전략..."
-}
-```
-
-### 트렌딩 API
-```python
-GET /api/trending?days=7
-
-Response:
-{
-  "keywords": [
+  "explicit_claims": [
     {
-      "keyword": "경제",
-      "count": 45,
-      "trend_score": 8.5
+      "subject": "민주당",
+      "predicate": "유심교체 정보를 불법으로 얻었다",
+      "quote": "유심교체를 어떻게 알아"
+    }
+  ],
+
+  "implicit_assumptions": [
+    "민주당은 통신사를 협박해서 정보를 얻는다",
+    "이런 사찰은 독재의 시작이다"
+  ],
+
+  "deep_beliefs": [
+    "민주당/좌파는 과거 독재정권처럼 사찰로 반대파를 제거한다",
+    "지금의 작은 사찰이 곧 전면적 감시독재 사회로 발전한다"
+  ],
+
+  "worldview_hints": "과거 독재 → 현재 재현, 좌파 = 독재 본성"
+}
+```
+
+### 2. 세계관 자동 발견
+
+**OptimalWorldviewConstructor**가 계층형 세계관을 자동으로 발견하고 생성:
+
+- **동적 생성**: 고정된 카테고리가 아님, 데이터에서 패턴을 발견
+- **자동 업데이트**: 새로운 담론 패턴이 감지되면 세계관 추가/변경
+- **계층 구조**: 대분류 → 세부 세계관으로 자동 조직화
+
+**현재 발견된 세계관 (2025-01 기준)**
+- 3개 대분류, 6개 세부 세계관
+- 민주당/좌파에 대한 인식 > 독재 재현
+- 외부 세력의 위협 > 중국의 부정적 영향
+- (계속 추가/변경됨)
+
+### 3. Hybrid 매칭
+
+**Vector Embedding (70%) + Keyword (30%)**로 perception을 세계관에 자동 분류:
+
+```python
+hybrid_score = (
+    0.7 * cosine_similarity(perception_embedding, worldview_embedding) +
+    0.3 * keyword_match_score(perception_keywords, worldview_concepts)
+)
+
+if hybrid_score > 0.5:
+    create_link(perception_id, worldview_id, hybrid_score)
+```
+
+### 4. 대시보드 시각화
+
+- **계층형 네비게이션**: 대분류 → 세부 세계관
+- **원본 글 보기**: 세계관이 발견된 실제 DC Gallery 글
+- **Narrative 표시**: DC 해석 vs 일반 해석 대비
+- **반박 논리** (개발 중): 각 세계관에 대한 효과적 대응
+
+---
+
+## 📊 데이터 파이프라인
+
+### 자동 모니터링 (GitHub Actions)
+
+시스템은 **자동으로** 다음을 수행합니다:
+- DC Inside 미국정치 갤러리(`uspolitics`) 모니터링
+- 새 게시글 수집 및 3-Layer 분석
+- 세계관 자동 업데이트 및 매칭
+
+### 수동 실행 (개발자용)
+
+**1. 데이터 수집**
+```bash
+python scripts/collect_500_posts.py
+```
+- DC Gallery에서 개념글 수집
+- `contents` 테이블에 저장
+
+**2. 3-Layer 분석**
+```python
+import asyncio
+from engines.analyzers.layered_perception_extractor import LayeredPerceptionExtractor
+
+extractor = LayeredPerceptionExtractor()
+# 각 content에 대해 extract_layered_perception() 실행
+```
+- GPT-5-mini 사용
+- `layered_perceptions` 테이블에 저장
+- 비용: ~$0.05/글
+
+**3. 세계관 구성**
+```python
+import asyncio
+from engines.analyzers.optimal_worldview_constructor import OptimalWorldviewConstructor
+
+async def main():
+    constructor = OptimalWorldviewConstructor()
+    await constructor.construct_all()
+
+asyncio.run(main())
+```
+- GPT-5 사용하여 세계관 자동 발견
+- `worldviews` 테이블에 저장
+- `perception_worldview_links` 자동 생성
+
+**4. 지속적 업데이트**
+```python
+import asyncio
+from engines.analyzers.worldview_updater import WorldviewUpdater
+
+async def main():
+    updater = WorldviewUpdater()
+    await updater.daily_update()  # 일일 업데이트
+    # await updater.weekly_update()  # 주간 예시 보강
+    # await updater.check_and_rebuild_if_needed()  # 재구성 판단
+
+asyncio.run(main())
+```
+
+---
+
+## 🌍 세계관 구조
+
+### 예시: "독재 재현" 세계관
+
+**Narrative** (이야기)
+```
+민주당은 과거 독재 정권의 방식을 재현하고 있다.
+
+예시: 유심교체 정보 사건
+- DC Gallery 해석:
+  사찰을 통한 독재적 통치를 시도하고 있다
+
+- 일반적 해석:
+  정치적 논란 속의 정보 유출 사건
+
+- 해석 차이의 핵심:
+  의도적 독재 시도 vs 정보 유출 문제
+
+논리 연쇄: 사찰 → 권력 장악 → 독재 사회
+```
+
+**Metadata** (구조)
+```json
+{
+  "core": {
+    "primary_subject": "민주당",
+    "primary_attribute": "독재적 성향",
+    "primary_action": "사찰을 통한 권력 장악"
+  },
+
+  "interpretation_frame": {
+    "historical_lens": {
+      "reference_period": "과거 독재 시대",
+      "reference_events": ["사찰 사건", "권력 집중"],
+      "projection_logic": "과거 패턴 → 현재 반복"
+    },
+
+    "slippery_slope": {
+      "trigger": "사찰 사건",
+      "escalation": "권력 장악 시도",
+      "endpoint": "독재 사회"
+    }
+  },
+
+  "emotional_drivers": {
+    "primary": "불신",
+    "secondary": ["불안", "경계"],
+    "urgency_level": "높음"
+  }
+}
+```
+
+**Deconstruction** (반박 논리) - 개발 중
+```json
+{
+  "logical_flaws": [
+    {
+      "type": "슬리퍼리 슬로프",
+      "description": "사찰 사건 → 독재 사회로의 필연적 발전 가정",
+      "rebuttal": "단일 사건과 체제 변화는 다른 차원의 문제"
+    }
+  ],
+
+  "fact_checks": [
+    {
+      "claim": "민주당이 통신사를 협박해 정보 취득",
+      "reality": "정보 유출 경로는 다양하며 협박 증거 없음",
+      "evidence": "[팩트체크 링크]"
     }
   ]
 }
 ```
 
-## 🔍 모니터링 및 디버깅
+---
 
-### 로그 확인
+## 🖥 대시보드
+
+### 접속
+
 ```bash
-# 크롤러 로그
-tail -f logs/crawler.log
-
-# RAG 시스템 로그
-tail -f logs/rag_system.log
+cd dashboard
+npm run dev
+# http://localhost:3000
 ```
 
-### 데이터베이스 상태 확인
+### 화면 구성
+
+**1. 메인 페이지** - 계층형 세계관 맵
+- 3개 대분류 카테고리
+- 각 카테고리별 세부 세계관
+- perception 개수, 강도 표시
+
+**2. 세계관 상세 페이지** (`/worldviews/[id]`)
+- Narrative (예시 중심 설명)
+- Metadata 시각화
+  - Core (주체 = 속성)
+  - Slippery Slope 다이어그램
+  - Emotional Drivers
+- **원본 글 목록** ← 실제 DC Gallery 게시글
+  - 제목, 본문 미리보기
+  - 원문 링크 (DC Gallery)
+  - 추출된 perception 표시
+- 반박 논리 (개발 중)
+
+**3. 검색 기능** (개발 중)
+- 키워드로 세계관 검색
+- 관련 세계관 추천
+
+---
+
+## 👨‍💻 개발 가이드
+
+### 프로젝트 구조
+
+```
+moniterdc/
+├── engines/                    # 핵심 분석 엔진
+│   ├── analyzers/              # ✅ NEW schema 전용
+│   │   ├── layered_perception_extractor.py  # 3-Layer 분석
+│   │   ├── optimal_worldview_constructor.py # 세계관 자동 발견
+│   │   ├── worldview_updater.py            # 자동 업데이트
+│   │   ├── belief_normalizer.py            # 신념 정규화
+│   │   └── context_guide_builder.py        # 맥락 가이드
+│   ├── collectors/
+│   │   └── content_collector.py            # 통합 수집 엔진
+│   ├── adapters/
+│   │   └── dc_gallery_adapter.py           # DC Gallery 어댑터
+│   └── utils/
+│       ├── supabase_client.py
+│       └── embedding_utils.py
+│
+├── dashboard/                  # Next.js 대시보드 (개편 예정)
+│   ├── app/
+│   │   ├── page.tsx           # 메인 페이지
+│   │   ├── worldviews/[id]/page.tsx  # 세계관 상세
+│   │   └── api/worldviews/    # API
+│   └── components/
+│
+├── supabase/migrations/        # DB 스키마 (NEW schema)
+│   ├── 100_create_contents.sql
+│   ├── 201_create_layered_perceptions.sql
+│   ├── 103_create_worldviews.sql
+│   └── 203_create_perception_worldview_links.sql
+│
+├── scripts/                    # 실행 스크립트
+│   ├── collect_500_posts.py   # 데이터 수집
+│   └── complete_setup.py      # 전체 설정
+│
+├── _deprecated/                # 사용 안 함 (OLD schema)
+│   └── engines/               # perception_extractor 등
+│
+└── README.md                   # 이 문서
+```
+
+### 핵심 클래스
+
+**LayeredPerceptionExtractor**
+```python
+from engines.analyzers.layered_perception_extractor import LayeredPerceptionExtractor
+
+extractor = LayeredPerceptionExtractor()
+perception = await extractor.extract_layered_perception(
+    content_id="...",
+    title="...",
+    body="..."
+)
+```
+
+**OptimalWorldviewConstructor**
+```python
+from engines.analyzers.optimal_worldview_constructor import OptimalWorldviewConstructor
+
+constructor = OptimalWorldviewConstructor()
+
+# 계층형 세계관 구성
+worldviews = await constructor.build_hierarchical_worldviews()
+
+# perception 매칭
+await constructor._match_perceptions_to_worldviews(perceptions, worldviews)
+```
+
+**WorldviewUpdater**
+```python
+from engines.analyzers.worldview_updater import WorldviewUpdater
+
+updater = WorldviewUpdater()
+
+# 일일 업데이트
+await updater.daily_update()
+
+# 주간 업데이트 (예시 추가)
+await updater.weekly_update()
+
+# 월간 체크 (재구성 필요 시)
+await updater.check_and_rebuild_if_needed()
+```
+
+### API 엔드포인트
+
+**GET /api/worldviews**
+```typescript
+// 세계관 목록 조회
+const { worldviews, pagination } = await fetch('/api/worldviews?limit=50')
+  .then(r => r.json())
+```
+
+**GET /api/worldviews/:id**
+```typescript
+// 세계관 상세 조회
+const {
+  ...worldview,
+  perceptions,     // 연결된 perception 목록
+  contents,        // 원본 글 목록
+  strength_history // 강도 변화 히스토리
+} = await fetch(`/api/worldviews/${id}`).then(r => r.json())
+```
+
+### 데이터베이스 스키마
+
+**주요 테이블**
+
 ```sql
--- 논리 저장 현황
-SELECT logic_type, COUNT(*) FROM logic_repository GROUP BY logic_type;
+-- 원본 글
+CREATE TABLE contents (
+    id UUID PRIMARY KEY,
+    title TEXT,
+    body TEXT,
+    source_url TEXT,
+    gallery_id TEXT,
+    published_at TIMESTAMPTZ
+);
 
--- 매칭 성공률
-SELECT AVG(match_confidence) FROM logic_matches;
+-- 3-Layer 분석 결과
+CREATE TABLE layered_perceptions (
+    id UUID PRIMARY KEY,
+    content_id UUID REFERENCES contents(id),
+    explicit_claims JSONB,
+    implicit_assumptions JSONB,
+    deep_beliefs JSONB,
+    worldview_hints TEXT
+);
 
--- 트렌딩 키워드
-SELECT * FROM get_trending_keywords(7, 10);
+-- 세계관
+CREATE TABLE worldviews (
+    id UUID PRIMARY KEY,
+    title TEXT,
+    frame JSONB,  -- { category, subcategory, narrative, metadata }
+    strength_overall FLOAT,
+    total_perceptions INT
+);
+
+-- perception ↔ worldview 연결
+CREATE TABLE perception_worldview_links (
+    id UUID PRIMARY KEY,
+    perception_id UUID REFERENCES layered_perceptions(id),
+    worldview_id UUID REFERENCES worldviews(id),
+    relevance_score FLOAT
+);
 ```
 
-## 🚨 주의사항
+---
 
-1. **API 한도 관리**
-   - OpenAI API 일일 한도 설정
-   - Rate limiting 구현
-   - 비용 모니터링 대시보드
+## 🔄 자동화
 
-2. **데이터 보안**
-   - 환경변수 암호화
-   - Supabase RLS 설정
-   - 민감 정보 마스킹
+### GitHub Actions
 
-3. **성능 최적화**
-   - 벡터 인덱스 최적화
-   - 배치 처리 활용
-   - 캐싱 전략 구현
+**.github/workflows/daily_update.yml**
+```yaml
+name: Daily Worldview Update
 
-## 📈 로드맵
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 매일 오전 2시 (KST 11시)
+  workflow_dispatch:
 
-### v3.1 (예정)
-- [ ] Fine-tuning 모델 적용
-- [ ] 멀티모달 분석 (이미지 포함)
-- [ ] 실시간 스트리밍 분석
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run daily update
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -c "
+          import asyncio
+          from engines.analyzers.worldview_updater import WorldviewUpdater
+          asyncio.run(WorldviewUpdater().daily_update())
+          "
+```
 
-### v3.2 (예정)
-- [ ] 자동 반박문 생성
-- [ ] 소셜미디어 연동
-- [ ] A/B 테스트 시스템
+---
 
-## 🤝 기여 가이드
+## 📈 성과 및 통계
+
+### 현재 데이터
+
+- **원본 글**: 297개
+- **Perception**: 297개 (3-Layer 분석 완료)
+- **세계관**: 6개 (계층형)
+- **링크**: 26개 (perception-worldview)
+
+### 세계관별 분포
+
+| 세계관 | Perception 수 |
+|--------|--------------|
+| 중국의 부정적 영향 | 10개 |
+| 좌파의 사회적 위협 | 7개 |
+| 독재 재현 | 5개 |
+| 북한의 지속적 위협 | 3개 |
+| 사법부와 언론의 결탁 | 1개 |
+
+### 비용 분석 (GPT-4o)
+
+- 3-Layer 분석: ~$0.05/글
+- 세계관 구성: ~$0.30/세계관
+- 일일 업데이트: ~$0.10/일
+
+---
+
+## 🚧 개발 중 기능
+
+### 1. 반박 논리 생성 (Deconstruction)
+
+각 세계관에 대한 6가지 반박 전략:
+- 논리적 결함 (Logical Flaws)
+- 팩트체크 (Fact Checks)
+- 대안적 해석 (Alternative Interpretations)
+- 역사적 수정 (Historical Corrections)
+- 감정적 이해 (Emotional Understanding)
+- 대화 가이드 (Dialogue Guide)
+
+### 2. 검색 기능
+
+키워드로 세계관 검색 및 관련 세계관 추천
+
+### 3. 모니터링 대시보드
+
+- 세계관 강도 변화 추적
+- 새로운 세계관 발견 알림
+- 트렌드 분석
+
+---
+
+## 🤝 기여하기
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -280,17 +698,31 @@ SELECT * FROM get_trending_keywords(7, 10);
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+---
+
 ## 📄 라이센스
 
 MIT License - 자유롭게 사용, 수정, 배포 가능
 
-## 💬 문의 및 지원
+---
+
+## 📞 문의
 
 - Issues: [GitHub Issues](https://github.com/yourusername/moniterdc/issues)
 - Email: your.email@example.com
-- Telegram: @yourtelegram
 
 ---
 
-**Built with ❤️ using LangChain, Supabase, and OpenAI**
-# Updated Fri Sep 26 12:16:44 KST 2025
+## 🙏 감사의 말
+
+이 프로젝트는 다음 기술들을 사용합니다:
+- OpenAI GPT-4o
+- Supabase
+- Next.js
+- Python asyncio
+
+---
+
+**Built with ❤️ to bridge understanding gaps**
+
+Last Updated: 2025-01-05

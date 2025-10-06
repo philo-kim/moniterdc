@@ -133,81 +133,62 @@ jobs:
         " >> $GITHUB_STEP_SUMMARY
 
   # =======================================
-  # Job 3: 공격-방어 매칭
+  # Job 3: 커뮤니티 통계 (매칭 대신)
   # =======================================
-  attack_defense_matching:
-    name: Attack-Defense Matching
+  community_stats:
+    name: Community Response Stats
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: crawl_and_vectorize
     if: ${{ always() && github.event.inputs.mode != 'crawl' && github.event.inputs.mode != 'alert' }}
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-    
+
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-    
-    - name: Run attack-defense matcher
-      env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      run: |
-        python scheduler/background_matcher_fixed.py --once
-    
-    - name: Generate matching report
-      if: always()
+        pip install supabase python-dotenv
+
+    - name: Generate community stats
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       run: |
-        echo "## 🎯 Matching Report" >> $GITHUB_STEP_SUMMARY
+        echo "## 💬 Community Response Stats" >> $GITHUB_STEP_SUMMARY
         echo "Time: $(date)" >> $GITHUB_STEP_SUMMARY
         python -c "
         from supabase import create_client
         import os
         from datetime import datetime, timedelta
-        
+
         supabase = create_client(
             os.getenv('SUPABASE_URL'),
             os.getenv('SUPABASE_SERVICE_KEY')
         )
-        
-        # 최근 매칭
-        since = (datetime.now() - timedelta(minutes=15)).isoformat()
-        
-        new_matches = supabase.table('logic_matches').select('match_confidence').gte(
+
+        # 최근 24시간 통계
+        since = (datetime.now() - timedelta(hours=24)).isoformat()
+
+        # 새 대응 댓글
+        new_counters = supabase.table('counter_arguments').select('*').gte(
             'created_at', since
         ).execute()
-        
-        if new_matches.data:
-            avg_conf = sum(m['match_confidence'] for m in new_matches.data) / len(new_matches.data)
-            high_conf = len([m for m in new_matches.data if m['match_confidence'] >= 0.8])
-            
-            print(f'### New Matches (Last 15 min)')
-            print(f'- Total: {len(new_matches.data)}')
-            print(f'- Avg Confidence: {avg_conf:.0%}')
-            print(f'- High Confidence (>80%): {high_conf}')
-        else:
-            print('No new matches')
-        
-        # 미매칭 공격
-        unmatched = supabase.rpc('get_unmatched_attacks', {'limit_count': 100}).execute()
-        if unmatched.data:
-            critical = len([a for a in unmatched.data if a.get('threat_level', 0) >= 8])
-            print(f'')
-            print(f'### Unmatched Attacks')
-            print(f'- Total: {len(unmatched.data)}')
-            print(f'- Critical (threat >= 8): {critical}')
+
+        # 미대응 공격
+        attacks = supabase.from_('attack_logic_with_counters').select('counter_count').eq('counter_count', 0).execute()
+
+        print(f'### Last 24 Hours')
+        print(f'- 새 대응: {len(new_counters.data) if new_counters.data else 0}개')
+        print(f'- 미대응 공격: {len(attacks.data) if attacks.data else 0}개')
+        print(f'')
+        print(f'### 대시보드')
+        print(f'- http://localhost:3000')
         " >> $GITHUB_STEP_SUMMARY
 
   # =======================================
@@ -217,7 +198,7 @@ jobs:
     name: Send Telegram Alerts
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: attack_defense_matching
+    needs: community_stats
     if: ${{ always() && github.event.inputs.mode != 'crawl' && github.event.inputs.mode != 'match' }}
     
     steps:
@@ -374,7 +355,7 @@ jobs:
   error_recovery:
     name: Error Recovery
     runs-on: ubuntu-latest
-    needs: [crawl_and_vectorize, attack_defense_matching]
+    needs: [crawl_and_vectorize, community_stats]
     if: failure()
     
     steps:
