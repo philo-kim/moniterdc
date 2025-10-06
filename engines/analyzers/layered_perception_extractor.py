@@ -107,6 +107,7 @@ JSON 형식:
 }}
 """
 
+        # GPT-5 only (no fallback as requested)
         response = await client.chat.completions.create(
             model="gpt-5",
             messages=[
