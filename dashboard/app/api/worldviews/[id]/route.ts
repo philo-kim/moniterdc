@@ -41,20 +41,31 @@ export async function GET(
       .select('perception_id, relevance_score')
       .eq('worldview_id', id)
 
-    const perceptionIds = (links || []).map(l => l.perception_id)
+    const layeredPerceptionIds = (links || []).map(l => l.perception_id)
     let perceptions = []
+    let contentIds: string[] = []
 
-    if (perceptionIds.length > 0) {
-      const { data: perceptionData } = await supabase
+    if (layeredPerceptionIds.length > 0) {
+      // Get layered perceptions to find content IDs
+      const { data: layeredData } = await supabase
         .from('layered_perceptions')
-        .select('*')
-        .in('id', perceptionIds)
+        .select('content_id')
+        .in('id', layeredPerceptionIds)
 
-      perceptions = perceptionData || []
+      contentIds = [...new Set((layeredData || []).map(lp => lp.content_id).filter(Boolean))]
+
+      // Get actual perceptions from perceptions table (has the display fields)
+      if (contentIds.length > 0) {
+        const { data: perceptionData } = await supabase
+          .from('perceptions')
+          .select('*')
+          .in('content_id', contentIds)
+
+        perceptions = perceptionData || []
+      }
     }
 
     // Get contents (source materials)
-    const contentIds = [...new Set(perceptions.map(p => p.content_id).filter(Boolean))]
     let contents = []
 
     if (contentIds.length > 0) {
