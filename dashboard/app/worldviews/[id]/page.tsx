@@ -280,7 +280,7 @@ export default function WorldviewDetailPage() {
                     {/* 3-Layer Analysis */}
                     {contentPerceptions.length > 0 && (
                       <div className="mt-4 pt-4 border-t-2 border-slate-200 space-y-4">
-                        {contentPerceptions.map((lp, idx) => (
+                        {contentPerceptions.slice(0, 1).map((lp, idx) => (
                           <div key={idx} className="space-y-4">
                             {/* Layer 1: Explicit Claims */}
                             {lp.explicit_claims && lp.explicit_claims.length > 0 && (
