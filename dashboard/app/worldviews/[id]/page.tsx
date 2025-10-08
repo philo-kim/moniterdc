@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import useSWR from 'swr'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -14,14 +14,6 @@ import {
   Heart,
   AlertTriangle
 } from 'lucide-react'
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error('Failed to fetch')
-  }
-  return res.json()
-}
 
 interface ExplicitClaim {
   subject: string
@@ -104,16 +96,29 @@ export default function WorldviewDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: worldview, error, isLoading } = useSWR(
-    `/api/worldviews/${id}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      shouldRetryOnError: true,
-      errorRetryCount: 3
+  const [worldview, setWorldview] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setIsLoading(true)
+        const res = await fetch(`/api/worldviews/${id}`)
+        if (!res.ok) {
+          throw new Error('Failed to fetch worldview')
+        }
+        const data = await res.json()
+        setWorldview(data)
+        setError(null)
+      } catch (err) {
+        setError(err as Error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  )
+    loadData()
+  }, [id])
 
   if (isLoading) {
     return (
