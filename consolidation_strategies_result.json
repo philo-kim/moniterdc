@@ -1,0 +1,335 @@
+{
+  "strategy1_keyword": {
+    "count": 21,
+    "clusters": [
+      [
+        "정치보복과 인권 침식",
+        "보수정권의 공안 회귀와 정치보복"
+      ],
+      [
+        "계엄·비상조치의 합헌적 방패론"
+      ],
+      [
+        "중국 산업 성과 불신(보조금·선전)"
+      ],
+      [
+        "좌파/민주당의 독재 재현과 사찰-사법 장악"
+      ],
+      [
+        "복지·보건 카르텔 파묘"
+      ],
+      [
+        "국경 완화 → 불법체류·범죄·아동 안전 위협",
+        "이민·관광 완화 -> 범죄·실종 확대"
+      ],
+      [
+        "온라인 여론전과 중국발 공작(매크로·박제)",
+        "중국발 온라인 여론공작"
+      ],
+      [
+        "소비자 보호장치 완화 = 이권·안전 후퇴"
+      ],
+      [
+        "제도권 언론 게이트키핑 vs 우파 우회로(대안 미디어·맘카페)"
+      ],
+      [
+        "중국 산업 성과 불신과 ‘시장 검증’ 강조"
+      ],
+      [
+        "체제 취약성 모델: 안보 이완 → 경제·사회 연쇄 붕괴"
+      ],
+      [
+        "집회·표현의 자유에 대한 제한과 책임전가 메커니즘"
+      ],
+      [
+        "독재 재현: 사찰·사법장악"
+      ],
+      [
+        "맘카페 동원과 생활정치"
+      ],
+      [
+        "합헌적 계엄·비상조치의 정당성"
+      ],
+      [
+        "집회·표현 통제와 공권력 편파"
+      ],
+      [
+        "한미동맹·대북억지 약화 -> 체제 붕괴"
+      ],
+      [
+        "자주무장 핵심 전력의 지속개발"
+      ],
+      [
+        "복지·보건 영역의 카르텔 ‘파묘’"
+      ],
+      [
+        "자주무장과 공세적 억제력(전력 공백 불가)"
+      ],
+      [
+        "제도권 언론 편향과 해외 보수 연대"
+      ]
+    ]
+  },
+  "strategy2_gpt5": {
+    "consolidated_worldviews": [
+      {
+        "new_name": "권위주의와 통제 체제",
+        "new_category": "정치적 권력과 인권",
+        "description": "정치적 권력의 남용과 인권 침해를 중심으로 한 담론",
+        "merged_ids": [
+          "a8480f0e-a03d-47b9-9555-db24c25476ce",
+          "e0f974eb-3f0a-4ced-a83c-c92d576020f2",
+          "9b9418e2-4e3e-4d78-817b-1ed17434a9b3",
+          "617e8ae4-adab-41f4-a2e3-7c96ca676f96"
+        ],
+        "reasoning": "이들은 모두 권위주의적 통제와 인권 침해에 대한 우려를 공유하고 있음."
+      },
+      {
+        "new_name": "중국발 위협과 사회 안전",
+        "new_category": "국제 관계와 국내 안전",
+        "description": "중국의 경제적, 사회적 위협과 이에 따른 국내 안전 문제",
+        "merged_ids": [
+          "d34a6505-aa14-4418-b327-db0f3f14be6c",
+          "5ee4f9c2-dbee-4bb6-83b7-bda9d270f89b",
+          "36ebf779-9fbe-4aca-ac5b-25bcc3cb919d",
+          "4c4267cc-bddc-425f-9e34-737441cf2aad",
+          "b61459de-97ca-4d39-bcef-ec0e17badfd0",
+          "3e2b8afb-e22b-4a0c-8faf-7f8f0e25bee8"
+        ],
+        "reasoning": "중국의 경제적, 사회적 위협과 그로 인한 국내 문제를 다루고 있음."
+      },
+      {
+        "new_name": "제도와 미디어 카르텔",
+        "new_category": "미디어와 제도적 권력",
+        "description": "제도적 권력과 미디어의 결탁 및 이에 대한 대안 네트워크",
+        "merged_ids": [
+          "84f4781d-1165-473f-a01c-879039765317",
+          "6b699b69-c6b7-4930-9ea4-1f32dac3a9c0",
+          "4a9ffcc9-ddde-468a-acbd-fc4909359492",
+          "3ce5d3d9-62f4-4aaa-ad95-35d276d797d6",
+          "22d2325e-e380-400b-a318-c6281bdf4f0b",
+          "4ef46693-e8b1-4e02-8bfd-9e7a97334deb"
+        ],
+        "reasoning": "제도적 권력과 미디어의 결탁 및 이에 대한 대안 네트워크를 중심으로 한 담론."
+      },
+      {
+        "new_name": "국가안보와 군사 억지",
+        "new_category": "국가안보와 군사 전략",
+        "description": "국가안보와 군사 억지 전략을 중심으로 한 담론",
+        "merged_ids": [
+          "3ccc9b90-0b60-4265-9c2e-31cd30afa6ef",
+          "6cf078f2-b329-42f0-a8f4-42e0c0f596d7",
+          "490378a7-bacb-47cc-b748-c5d45dccd2d9",
+          "d98e56d8-6fd3-4c76-8cf4-d80f2d49bb23",
+          "f2d2fa3b-d3a4-4e56-8460-3b9dca975ef2"
+        ],
+        "reasoning": "국가안보와 군사적 억지력에 대한 다양한 관점을 포함하고 있음."
+      },
+      {
+        "new_name": "권력의 도구화와 감시국가",
+        "new_category": "정치적 권력과 개인의 자유",
+        "description": "정치적 권력의 도구화와 감시 사회에 대한 담론",
+        "merged_ids": [
+          "3adec234-5a5a-46f2-8934-7ad711abe2fb",
+          "ea0d2f0e-6ee8-4ffa-b6e3-f68b0b253c25"
+        ],
+        "reasoning": "정치적 권력의 도구화와 감시 사회에 대한 우려를 공유하고 있음."
+      }
+    ]
+  },
+  "strategy3_user_centric": {
+    "attack_types": [
+      {
+        "attack_name": "정치적 보복과 인권 침해",
+        "user_description": "정치적 반대자를 탄압하고 인권을 침해하는 공격",
+        "example_attacks": "정치적 반대자에 대한 사찰 및 사법 장악",
+        "merged_ids": [
+          "a8480f0e-a03d-47b9-9555-db24c25476ce",
+          "9b9418e2-4e3e-4d78-817b-1ed17434a9b3",
+          "617e8ae4-adab-41f4-a2e3-7c96ca676f96"
+        ],
+        "perception_count": 146
+      },
+      {
+        "attack_name": "중국발 위협과 사회 불안",
+        "user_description": "중국의 경제적·사회적 위협을 강조하는 공격",
+        "example_attacks": "중국의 산업 성과 불신 및 불법체류자 문제",
+        "merged_ids": [
+          "d34a6505-aa14-4418-b327-db0f3f14be6c",
+          "5ee4f9c2-dbee-4bb6-83b7-bda9d270f89b",
+          "36ebf779-9fbe-4aca-ac5b-25bcc3cb919d",
+          "4c4267cc-bddc-425f-9e34-737441cf2aad",
+          "b61459de-97ca-4d39-bcef-ec0e17badfd0",
+          "3e2b8afb-e22b-4a0c-8faf-7f8f0e25bee8"
+        ],
+        "perception_count": 95
+      },
+      {
+        "attack_name": "언론과 제도의 편향성",
+        "user_description": "언론과 제도가 특정 이념에 편향되어 있다는 공격",
+        "example_attacks": "제도권 언론의 편향성과 대안 미디어의 필요성",
+        "merged_ids": [
+          "84f4781d-1165-473f-a01c-879039765317",
+          "6b699b69-c6b7-4930-9ea4-1f32dac3a9c0",
+          "4a9ffcc9-ddde-468a-acbd-fc4909359492",
+          "22d2325e-e380-400b-a318-c6281bdf4f0b",
+          "4ef46693-e8b1-4e02-8bfd-9e7a97334deb"
+        ],
+        "perception_count": 55
+      },
+      {
+        "attack_name": "안보 위협과 군사적 억지",
+        "user_description": "국가 안보와 군사적 억지력을 약화시키려는 공격",
+        "example_attacks": "한미동맹 약화와 자주무장 필요성 강조",
+        "merged_ids": [
+          "3ccc9b90-0b60-4265-9c2e-31cd30afa6ef",
+          "490378a7-bacb-47cc-b748-c5d45dccd2d9",
+          "d98e56d8-6fd3-4c76-8cf4-d80f2d49bb23",
+          "fb922706-447e-40a3-9ee0-4bc918bf2072",
+          "f2d2fa3b-d3a4-4e56-8460-3b9dca975ef2"
+        ],
+        "perception_count": 34
+      },
+      {
+        "attack_name": "권력의 도구화와 감시",
+        "user_description": "권력을 이용한 감시와 통제를 강조하는 공격",
+        "example_attacks": "정부의 사찰 및 감시 체제 구축",
+        "merged_ids": [
+          "e0f974eb-3f0a-4ced-a83c-c92d576020f2",
+          "3adec234-5a5a-46f2-8934-7ad711abe2fb",
+          "617e8ae4-adab-41f4-a2e3-7c96ca676f96"
+        ],
+        "perception_count": 104
+      },
+      {
+        "attack_name": "사회적 불안과 경제 위기",
+        "user_description": "사회적 불안과 경제적 위기를 조장하는 공격",
+        "example_attacks": "안보 이완으로 인한 경제·사회 붕괴",
+        "merged_ids": [
+          "6cf078f2-b329-42f0-a8f4-42e0c0f596d7"
+        ],
+        "perception_count": 23
+      },
+      {
+        "attack_name": "복지와 보건의 카르텔",
+        "user_description": "복지와 보건 분야의 카르텔 문제를 지적하는 공격",
+        "example_attacks": "복지·보건 카르텔의 문제점 강조",
+        "merged_ids": [
+          "84f4781d-1165-473f-a01c-879039765317",
+          "22d2325e-e380-400b-a318-c6281bdf4f0b"
+        ],
+        "perception_count": 34
+      },
+      {
+        "attack_name": "집회와 표현의 자유 제한",
+        "user_description": "집회와 표현의 자유를 제한하려는 공격",
+        "example_attacks": "집회·표현의 자유에 대한 제한과 책임 전가",
+        "merged_ids": [
+          "3adec234-5a5a-46f2-8934-7ad711abe2fb",
+          "ea0d2f0e-6ee8-4ffa-b6e3-f68b0b253c25"
+        ],
+        "perception_count": 53
+      }
+    ]
+  },
+  "strategy4_hybrid": {
+    "final_worldviews": [
+      {
+        "name": "독재와 사찰의 부활",
+        "description": "좌파 정권의 사찰과 사법 장악을 통한 독재 재현",
+        "merged_ids": [
+          "e0f974eb-3f0a-4ced-a83c-c92d576020f2",
+          "9b9418e2-4e3e-4d78-817b-1ed17434a9b3"
+        ],
+        "estimated_count": 137,
+        "priority": "high"
+      },
+      {
+        "name": "정치보복과 인권 침해",
+        "description": "정치적 보복과 인권 침해를 통한 공안 회귀",
+        "merged_ids": [
+          "a8480f0e-a03d-47b9-9555-db24c25476ce",
+          "617e8ae4-adab-41f4-a2e3-7c96ca676f96"
+        ],
+        "estimated_count": 85,
+        "priority": "high"
+      },
+      {
+        "name": "표현의 자유 억압",
+        "description": "집회와 표현의 자유를 통제하여 공권력을 편파적으로 사용하는 것",
+        "merged_ids": [
+          "ea0d2f0e-6ee8-4ffa-b6e3-f68b0b253c25"
+        ],
+        "estimated_count": 52,
+        "priority": "medium"
+      },
+      {
+        "name": "온라인 여론 조작",
+        "description": "중국발 공작과 매크로를 통한 온라인 여론전",
+        "merged_ids": [
+          "36ebf779-9fbe-4aca-ac5b-25bcc3cb919d"
+        ],
+        "estimated_count": 37,
+        "priority": "medium"
+      },
+      {
+        "name": "복지·보건 카르텔 해체",
+        "description": "복지와 보건 분야의 카르텔을 파헤치는 것",
+        "merged_ids": [
+          "84f4781d-1165-473f-a01c-879039765317"
+        ],
+        "estimated_count": 33,
+        "priority": "low"
+      },
+      {
+        "name": "체제 취약성과 안보 위기",
+        "description": "안보 이완으로 인한 경제·사회적 붕괴 가능성",
+        "merged_ids": [
+          "6cf078f2-b329-42f0-a8f4-42e0c0f596d7"
+        ],
+        "estimated_count": 23,
+        "priority": "low"
+      },
+      {
+        "name": "이민 정책과 범죄 증가",
+        "description": "이민과 관광 완화로 인한 범죄와 실종 증가",
+        "merged_ids": [
+          "3e2b8afb-e22b-4a0c-8faf-7f8f0e25bee8"
+        ],
+        "estimated_count": 15,
+        "priority": "low"
+      },
+      {
+        "name": "중국 산업 불신",
+        "description": "중국 산업 성과에 대한 불신과 시장 검증의 필요성 강조",
+        "merged_ids": [
+          "4c4267cc-bddc-425f-9e34-737441cf2aad"
+        ],
+        "estimated_count": 14,
+        "priority": "low"
+      },
+      {
+        "name": "기타",
+        "description": "소수 출현 담론",
+        "merged_ids": [
+          "3ccc9b90-0b60-4265-9c2e-31cd30afa6ef",
+          "d34a6505-aa14-4418-b327-db0f3f14be6c",
+          "5ee4f9c2-dbee-4bb6-83b7-bda9d270f89b",
+          "6b699b69-c6b7-4930-9ea4-1f32dac3a9c0",
+          "4a9ffcc9-ddde-468a-acbd-fc4909359492",
+          "3adec234-5a5a-46f2-8934-7ad711abe2fb",
+          "3ce5d3d9-62f4-4aaa-ad95-35d276d797d6",
+          "fb922706-447e-40a3-9ee0-4bc918bf2072",
+          "b61459de-97ca-4d39-bcef-ec0e17badfd0",
+          "490378a7-bacb-47cc-b748-c5d45dccd2d9",
+          "d98e56d8-6fd3-4c76-8cf4-d80f2d49bb23",
+          "22d2325e-e380-400b-a318-c6281bdf4f0b",
+          "f2d2fa3b-d3a4-4e56-8460-3b9dca975ef2",
+          "4ef46693-e8b1-4e02-8bfd-9e7a97334deb"
+        ],
+        "estimated_count": 91,
+        "priority": "low"
+      }
+    ]
+  }
+}
