@@ -101,14 +101,11 @@ export function HierarchicalWorldviewMap() {
 
   const worldviews: Worldview[] = data?.worldviews || []
 
-  // Filter only hierarchical worldviews (with '>')
-  const hierarchical = worldviews.filter(w => w.title.includes('>'))
-
   // Group by category
   const categories: CategoryGroup[] = []
   const categoryMap = new Map<string, CategoryGroup>()
 
-  hierarchical.forEach(wv => {
+  worldviews.forEach(wv => {
     try {
       const frame: ParsedFrame = JSON.parse(wv.frame)
       const catName = frame.category
@@ -187,7 +184,7 @@ export function HierarchicalWorldviewMap() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">세부 세계관</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{hierarchical.length}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{worldviews.length}</p>
             </div>
             <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <MessageSquare className="h-6 w-6 text-purple-600" />
