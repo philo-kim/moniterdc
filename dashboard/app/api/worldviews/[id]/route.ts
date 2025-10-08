@@ -35,34 +35,25 @@ export async function GET(
       )
     }
 
-    // Get linked perceptions via perception_worldview_links
+    // Get linked layered_perceptions via perception_worldview_links
     const { data: links } = await supabase
       .from('perception_worldview_links')
       .select('perception_id, relevance_score')
       .eq('worldview_id', id)
 
     const layeredPerceptionIds = (links || []).map(l => l.perception_id)
-    let perceptions = []
+    let layeredPerceptions = []
     let contentIds: string[] = []
 
     if (layeredPerceptionIds.length > 0) {
-      // Get layered perceptions to find content IDs
+      // Get layered perceptions (full data with 3-layer analysis)
       const { data: layeredData } = await supabase
         .from('layered_perceptions')
-        .select('content_id')
+        .select('*')
         .in('id', layeredPerceptionIds)
 
-      contentIds = [...new Set((layeredData || []).map(lp => lp.content_id).filter(Boolean))]
-
-      // Get actual perceptions from perceptions table (has the display fields)
-      if (contentIds.length > 0) {
-        const { data: perceptionData } = await supabase
-          .from('perceptions')
-          .select('*')
-          .in('content_id', contentIds)
-
-        perceptions = perceptionData || []
-      }
+      layeredPerceptions = layeredData || []
+      contentIds = [...new Set(layeredPerceptions.map(lp => lp.content_id).filter(Boolean))]
     }
 
     // Get contents (source materials)
@@ -88,15 +79,13 @@ export async function GET(
     // Build complete response
     return NextResponse.json({
       ...worldview,
-      perceptions,
+      layered_perceptions: layeredPerceptions,
       contents,
       strength_history: strengthHistory || [],
       stats: {
-        total_perceptions: perceptions.length,
+        total_perceptions: layeredPerceptions.length,
         total_contents: contents.length,
-        perception_density: perceptions.length / Math.max(contents.length, 1),
-        avg_valence: calculateAvgValence(perceptions),
-        temporal_span_days: calculateTemporalSpan(perceptions)
+        perception_density: layeredPerceptions.length / Math.max(contents.length, 1)
       }
     })
 
@@ -181,37 +170,3 @@ export async function DELETE(
   }
 }
 
-// Helper functions
-
-function calculateAvgValence(perceptions: any[]): string {
-  if (!perceptions.length) return 'neutral'
-
-  const valences = perceptions.map(p => p.perceived_valence)
-  const counts = {
-    positive: valences.filter(v => v === 'positive').length,
-    negative: valences.filter(v => v === 'negative').length,
-    neutral: valences.filter(v => v === 'neutral').length
-  }
-
-  const max = Math.max(counts.positive, counts.negative, counts.neutral)
-
-  if (max === counts.positive) return 'positive'
-  if (max === counts.negative) return 'negative'
-  return 'neutral'
-}
-
-function calculateTemporalSpan(perceptions: any[]): number {
-  if (!perceptions.length) return 0
-
-  const dates = perceptions
-    .map(p => p.extracted_at)
-    .filter(Boolean)
-    .map(d => new Date(d).getTime())
-
-  if (dates.length < 2) return 0
-
-  const minDate = Math.min(...dates)
-  const maxDate = Math.max(...dates)
-
-  return Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) // days
-}

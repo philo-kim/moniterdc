@@ -5,26 +5,40 @@ import useSWR from 'swr'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  Target,
   FileText,
   ExternalLink,
   AlertCircle,
-  TrendingUp
+  Layers,
+  Eye,
+  Brain,
+  Heart,
+  AlertTriangle
 } from 'lucide-react'
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
-interface Perception {
+interface ExplicitClaim {
+  subject: string
+  predicate: string
+  evidence_cited: string
+  quote: string
+}
+
+interface ReasoningGap {
+  from: string
+  to: string
+  gap: string
+}
+
+interface LayeredPerception {
   id: string
   content_id: string
-  perceived_subject: string
-  perceived_attribute: string
-  perceived_valence: 'positive' | 'negative' | 'neutral'
-  claims: string[]
-  keywords: string[]
-  emotions: string[]
-  credibility: number
-  confidence: number
+  explicit_claims: ExplicitClaim[]
+  implicit_assumptions: string[]
+  reasoning_gaps: ReasoningGap[]
+  deep_beliefs: string[]
+  worldview_hints: string
+  created_at: string
 }
 
 interface Content {
@@ -80,22 +94,6 @@ function PriorityBadge({ priority }: { priority?: 'high' | 'medium' | 'low' }) {
   )
 }
 
-function ValenceBadge({ valence }: { valence: string }) {
-  const config = {
-    positive: { bg: 'bg-green-100', text: 'text-green-800', label: '긍정' },
-    negative: { bg: 'bg-red-100', text: 'text-red-800', label: '부정' },
-    neutral: { bg: 'bg-gray-100', text: 'text-gray-800', label: '중립' }
-  }
-
-  const style = config[valence as keyof typeof config] || config.neutral
-
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`}>
-      {style.label}
-    </span>
-  )
-}
-
 export default function WorldviewDetailPage() {
   const params = useParams()
   const id = params.id as string
@@ -131,44 +129,23 @@ export default function WorldviewDetailPage() {
   }
 
   const frame: ParsedFrame = JSON.parse(worldview.frame)
-  const perceptions: Perception[] = worldview.perceptions || []
+  const layeredPerceptions: LayeredPerception[] = worldview.layered_perceptions || []
   const contents: Content[] = worldview.contents || []
 
-  // Group perceptions by content
-  const perceptionsByContent = new Map<string, Perception[]>()
-  perceptions.forEach((p) => {
-    if (p.content_id) {
-      if (!perceptionsByContent.has(p.content_id)) {
-        perceptionsByContent.set(p.content_id, [])
+  // Group layered perceptions by content
+  const perceptionsByContent = new Map<string, LayeredPerception[]>()
+  layeredPerceptions.forEach((lp) => {
+    if (lp.content_id) {
+      if (!perceptionsByContent.has(lp.content_id)) {
+        perceptionsByContent.set(lp.content_id, [])
       }
-      perceptionsByContent.get(p.content_id)!.push(p)
+      perceptionsByContent.get(lp.content_id)!.push(lp)
     }
   })
 
-  // 감정/키워드 통계
-  const emotionCounts = new Map<string, number>()
-  const keywordCounts = new Map<string, number>()
-
-  perceptions.forEach(p => {
-    p.emotions?.forEach(emotion => {
-      emotionCounts.set(emotion, (emotionCounts.get(emotion) || 0) + 1)
-    })
-    p.keywords?.forEach(keyword => {
-      keywordCounts.set(keyword, (keywordCounts.get(keyword) || 0) + 1)
-    })
-  })
-
-  const topEmotions = Array.from(emotionCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-
-  const topKeywords = Array.from(keywordCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Back Button */}
         <Link
           href="/"
@@ -194,14 +171,35 @@ export default function WorldviewDetailPage() {
             <p className="text-lg text-blue-900 leading-relaxed">
               {worldview.description || frame.description}
             </p>
+            <div className="mt-3 pt-3 border-t border-blue-300 flex items-center gap-6 text-sm">
+              {worldview.core_subject && (
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-blue-700">핵심 대상:</span>
+                  <span className="text-blue-900">{worldview.core_subject}</span>
+                </div>
+              )}
+              {worldview.overall_valence && (
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-blue-700">전체 감정:</span>
+                  <span className={`px-2 py-0.5 rounded ${
+                    worldview.overall_valence === 'negative' ? 'bg-red-100 text-red-800' :
+                    worldview.overall_valence === 'positive' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {worldview.overall_valence === 'negative' ? '부정' :
+                     worldview.overall_valence === 'positive' ? '긍정' : '중립'}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">분석된 공격</p>
+              <p className="text-sm text-slate-600">분석된 글</p>
               <p className="text-2xl font-bold text-slate-900 mt-1">
-                {worldview.total_perceptions || 0}개
+                {layeredPerceptions.length}개
               </p>
             </div>
             <div className="text-center p-3 bg-slate-50 rounded-lg">
@@ -219,59 +217,19 @@ export default function WorldviewDetailPage() {
           </div>
         </div>
 
-        {/* 주요 감정 */}
-        {topEmotions.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-orange-600" />
-              <h2 className="text-xl font-bold text-slate-900">주요 감정</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {topEmotions.map(([emotion, count]) => (
-                <span
-                  key={emotion}
-                  className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium"
-                >
-                  {emotion} ({count})
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 주요 키워드 */}
-        {topKeywords.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-purple-600" />
-              <h2 className="text-xl font-bold text-slate-900">주요 키워드</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {topKeywords.map(([keyword, count]) => (
-                <span
-                  key={keyword}
-                  className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
-                >
-                  {keyword} ({count})
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Source Contents */}
+        {/* Source Contents with 3-Layer Analysis */}
         {contents.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="h-5 w-5 text-blue-600" />
               <h2 className="text-xl font-bold text-slate-900">
-                원본 글 ({contents.length}개)
+                원본 글 및 3층 구조 분석 ({contents.length}개)
               </h2>
             </div>
-            <p className="text-sm text-slate-600 mb-4">
-              이 공격 유형이 발견된 실제 DC Gallery 글들입니다
+            <p className="text-sm text-slate-600 mb-6">
+              이 공격 유형이 발견된 DC Gallery 글들과 3층 심층 분석 결과입니다
             </p>
-            <div className="space-y-3">
+            <div className="space-y-6">
               {contents.map((content) => {
                 const contentPerceptions = perceptionsByContent.get(content.id) || []
                 const dateToUse = content.published_at || content.created_at
@@ -286,22 +244,26 @@ export default function WorldviewDetailPage() {
                 return (
                   <div
                     key={content.id}
-                    className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="border-2 border-slate-200 rounded-lg p-5 hover:shadow-lg transition-shadow"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    {/* Content Header */}
+                    <div className="flex items-start justify-between gap-4 mb-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900 mb-2">
+                        <h3 className="font-bold text-lg text-slate-900 mb-2">
                           {content.title}
                         </h3>
                         {content.body && (
                           <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                            {content.body.substring(0, 150)}...
+                            {content.body.substring(0, 200)}...
                           </p>
                         )}
                         <div className="flex items-center gap-4 text-xs text-slate-500">
                           <span>{publishedDate}</span>
                           <span>•</span>
-                          <span>{contentPerceptions.length}개 인식 추출</span>
+                          <span className="flex items-center gap-1">
+                            <Layers className="h-3 w-3" />
+                            {contentPerceptions.length}개 분석
+                          </span>
                         </div>
                       </div>
                       <a
@@ -315,71 +277,132 @@ export default function WorldviewDetailPage() {
                       </a>
                     </div>
 
-                    {/* Show perceptions from this content */}
+                    {/* 3-Layer Analysis */}
                     {contentPerceptions.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-slate-200">
-                        <p className="text-xs font-medium text-slate-700 mb-2">
-                          이 글에서 추출된 인식 ({contentPerceptions.length}개):
-                        </p>
-                        <div className="space-y-2">
-                          {contentPerceptions.slice(0, 3).map((perc, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-slate-50 rounded p-3"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-semibold text-slate-900">
-                                      {perc.perceived_subject}
-                                    </span>
-                                    <ValenceBadge valence={perc.perceived_valence} />
-                                  </div>
-                                  <p className="text-sm text-slate-600">
-                                    {perc.perceived_attribute}
-                                  </p>
+                      <div className="mt-4 pt-4 border-t-2 border-slate-200 space-y-4">
+                        {contentPerceptions.map((lp, idx) => (
+                          <div key={idx} className="space-y-4">
+                            {/* Layer 1: Explicit Claims */}
+                            {lp.explicit_claims && lp.explicit_claims.length > 0 && (
+                              <div className="bg-blue-50 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Eye className="h-5 w-5 text-blue-600" />
+                                  <h4 className="font-bold text-blue-900">
+                                    표면층 (Explicit) - 명시적 주장
+                                  </h4>
+                                </div>
+                                <div className="space-y-3">
+                                  {lp.explicit_claims.map((claim, i) => (
+                                    <div key={i} className="bg-white rounded p-3">
+                                      <div className="font-semibold text-slate-900 mb-1">
+                                        {claim.subject}: <span className="font-normal">{claim.predicate}</span>
+                                      </div>
+                                      {claim.quote && (
+                                        <blockquote className="text-sm text-slate-600 italic border-l-2 border-blue-300 pl-3 mt-2">
+                                          &ldquo;{claim.quote}&rdquo;
+                                        </blockquote>
+                                      )}
+                                      {claim.evidence_cited && (
+                                        <div className="text-xs text-slate-500 mt-2">
+                                          근거: {claim.evidence_cited}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
+                            )}
 
-                              {perc.claims && perc.claims.length > 0 && (
-                                <div className="mt-2">
-                                  <p className="text-xs font-medium text-slate-600 mb-1">주장:</p>
-                                  <ul className="space-y-1">
-                                    {perc.claims.map((claim, i) => (
-                                      <li key={i} className="text-sm text-slate-700">
-                                        • {claim}
-                                      </li>
-                                    ))}
-                                  </ul>
+                            {/* Layer 2: Implicit Assumptions */}
+                            {lp.implicit_assumptions && lp.implicit_assumptions.length > 0 && (
+                              <div className="bg-orange-50 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Brain className="h-5 w-5 text-orange-600" />
+                                  <h4 className="font-bold text-orange-900">
+                                    암묵층 (Implicit) - 전제하는 사고
+                                  </h4>
                                 </div>
-                              )}
-
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                {perc.emotions?.slice(0, 3).map((emotion, i) => (
-                                  <span
-                                    key={i}
-                                    className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs"
-                                  >
-                                    {emotion}
-                                  </span>
-                                ))}
-                                {perc.keywords?.slice(0, 4).map((keyword, i) => (
-                                  <span
-                                    key={i}
-                                    className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs"
-                                  >
-                                    {keyword}
-                                  </span>
-                                ))}
+                                <ul className="space-y-2">
+                                  {lp.implicit_assumptions.map((assumption, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-orange-900">
+                                      <span className="text-orange-600 mt-1">▸</span>
+                                      <span>{assumption}</span>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
-                            </div>
-                          ))}
-                          {contentPerceptions.length > 3 && (
-                            <p className="text-xs text-slate-500 italic">
-                              +{contentPerceptions.length - 3}개 더...
-                            </p>
-                          )}
-                        </div>
+                            )}
+
+                            {/* Reasoning Gaps (논리 비약) */}
+                            {lp.reasoning_gaps && lp.reasoning_gaps.length > 0 && (
+                              <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                                  <h4 className="font-bold text-red-900">
+                                    논리 비약 (Reasoning Gaps) - 반박 포인트
+                                  </h4>
+                                </div>
+                                <div className="space-y-3">
+                                  {lp.reasoning_gaps.map((gap, i) => (
+                                    <div key={i} className="bg-white rounded p-3 border border-red-200">
+                                      <div className="space-y-2">
+                                        <div className="flex items-start gap-2">
+                                          <span className="text-xs font-semibold text-slate-500 mt-0.5">FROM:</span>
+                                          <p className="text-sm text-slate-700 flex-1">{gap.from}</p>
+                                        </div>
+                                        <div className="flex items-center justify-center">
+                                          <div className="text-red-600 text-lg">↓</div>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                          <span className="text-xs font-semibold text-slate-500 mt-0.5">TO:</span>
+                                          <p className="text-sm text-slate-700 flex-1">{gap.to}</p>
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-red-200">
+                                          <div className="flex items-start gap-2">
+                                            <span className="text-xs font-semibold text-red-600 mt-0.5">GAP:</span>
+                                            <p className="text-sm text-red-900 font-medium flex-1">{gap.gap}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Layer 3: Deep Beliefs */}
+                            {lp.deep_beliefs && lp.deep_beliefs.length > 0 && (
+                              <div className="bg-purple-50 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Heart className="h-5 w-5 text-purple-600" />
+                                  <h4 className="font-bold text-purple-900">
+                                    심층 (Deep) - 무의식적 믿음
+                                  </h4>
+                                </div>
+                                <ul className="space-y-2">
+                                  {lp.deep_beliefs.map((belief, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-purple-900">
+                                      <span className="text-purple-600 mt-1">●</span>
+                                      <span className="font-medium">{belief}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Worldview Hints */}
+                            {lp.worldview_hints && (
+                              <div className="bg-slate-50 rounded-lg p-4">
+                                <div className="text-xs font-medium text-slate-600 mb-2">
+                                  세계관 힌트:
+                                </div>
+                                <p className="text-sm text-slate-700 italic">
+                                  {lp.worldview_hints}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
