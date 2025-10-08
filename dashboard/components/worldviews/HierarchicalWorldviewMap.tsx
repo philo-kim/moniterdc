@@ -7,8 +7,7 @@
  * 3개 주요 카테고리로 그룹화
  */
 
-import { useState } from 'react'
-import useSWR from 'swr'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, MessageSquare, Target, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -57,16 +56,31 @@ interface CategoryGroup {
   total_perceptions: number
 }
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
-
 export function HierarchicalWorldviewMap() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['민주당/좌파에 대한 인식', '외부 세력의 위협']))
+  const [data, setData] = useState<any>(null)
+  const [error, setError] = useState<Error | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const { data, error, isLoading } = useSWR(
-    '/api/worldviews?limit=100',
-    fetcher,
-    { refreshInterval: 30000 }
-  )
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setIsLoading(true)
+        const res = await fetch('/api/worldviews?limit=100')
+        if (!res.ok) {
+          throw new Error('Failed to fetch worldviews')
+        }
+        const json = await res.json()
+        setData(json)
+        setError(null)
+      } catch (err) {
+        setError(err as Error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadData()
+  }, [])
 
   if (error) {
     return (
