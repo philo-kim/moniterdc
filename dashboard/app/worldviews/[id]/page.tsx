@@ -15,7 +15,13 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error('Failed to fetch')
+  }
+  return res.json()
+}
 
 interface ExplicitClaim {
   subject: string
@@ -100,10 +106,14 @@ export default function WorldviewDetailPage() {
 
   const { data: worldview, error, isLoading } = useSWR(
     `/api/worldviews/${id}`,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: true,
+      errorRetryCount: 3
+    }
   )
-
-  console.log('WorldviewDetail:', { id, isLoading, hasError: !!error, hasData: !!worldview, error })
 
   if (isLoading) {
     return (
