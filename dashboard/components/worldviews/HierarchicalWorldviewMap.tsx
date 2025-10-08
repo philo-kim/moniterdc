@@ -22,22 +22,11 @@ interface Worldview {
 interface ParsedFrame {
   category: string
   subcategory: string
-  narrative: {
-    summary: string
-    logic_chain: string
-  }
-  metadata: {
-    core: {
-      primary_subject: string
-      primary_attribute: string
-    }
-    emotional_drivers: {
-      primary: string
-    }
-  }
-  deconstruction?: {
-    logical_flaws?: any[]
-    fact_checks?: any[]
+  description: string
+  priority?: 'high' | 'medium' | 'low'
+  metadata?: {
+    merged_from?: string[]
+    estimated_count?: number
   }
 }
 
@@ -45,13 +34,11 @@ interface CategoryGroup {
   name: string
   worldviews: {
     id: string
-    subcategory: string
-    summary: string
-    logic_chain: string
+    title: string
+    description: string
+    priority?: 'high' | 'medium' | 'low'
     total_perceptions: number
     strength: number
-    primary_emotion: string
-    has_deconstruction: boolean
   }[]
   total_perceptions: number
 }
@@ -121,13 +108,11 @@ export function HierarchicalWorldviewMap() {
       const cat = categoryMap.get(catName)!
       cat.worldviews.push({
         id: wv.id,
-        subcategory: frame.subcategory,
-        summary: frame.narrative.summary,
-        logic_chain: frame.narrative.logic_chain,
+        title: wv.title,
+        description: frame.description,
+        priority: frame.priority,
         total_perceptions: wv.total_perceptions,
-        strength: wv.strength_overall,
-        primary_emotion: frame.metadata.emotional_drivers.primary,
-        has_deconstruction: !!(frame.deconstruction && Object.keys(frame.deconstruction).length > 0)
+        strength: wv.strength_overall
       })
       cat.total_perceptions += wv.total_perceptions
     } catch (e) {
@@ -148,18 +133,6 @@ export function HierarchicalWorldviewMap() {
       newExpanded.add(catName)
     }
     setExpandedCategories(newExpanded)
-  }
-
-  // Emotion color mapping
-  const getEmotionColor = (emotion: string) => {
-    const colors: Record<string, string> = {
-      '불안': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      '분노': 'bg-red-100 text-red-800 border-red-300',
-      '경계': 'bg-orange-100 text-orange-800 border-orange-300',
-      '불신': 'bg-purple-100 text-purple-800 border-purple-300',
-      '두려움': 'bg-gray-100 text-gray-800 border-gray-300'
-    }
-    return colors[emotion] || 'bg-blue-100 text-blue-800 border-blue-300'
   }
 
   const totalPerceptions = categories.reduce((sum, cat) => sum + cat.total_perceptions, 0)
@@ -256,35 +229,28 @@ export function HierarchicalWorldviewMap() {
                         key={wv.id}
                         className="bg-white rounded-lg border border-slate-200 p-5 hover:shadow-md transition-shadow"
                       >
-                        {/* Subcategory Header */}
+                        {/* Worldview Header */}
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                              {wv.subcategory}
+                              {wv.title}
                             </h3>
                             <p className="text-slate-700 text-sm leading-relaxed">
-                              {wv.summary}
+                              {wv.description}
                             </p>
                           </div>
 
-                          <div className="ml-4 flex flex-col gap-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEmotionColor(wv.primary_emotion)}`}>
-                              {wv.primary_emotion}
-                            </span>
-                            {wv.has_deconstruction && (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
-                                반박 준비됨
+                          {wv.priority && (
+                            <div className="ml-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                wv.priority === 'high' ? 'bg-red-100 text-red-800 border-red-300' :
+                                wv.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
+                                'bg-green-100 text-green-800 border-green-300'
+                              }`}>
+                                {wv.priority === 'high' ? '긴급' : wv.priority === 'medium' ? '주의' : '모니터링'}
                               </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Logic Chain */}
-                        <div className="mb-4 p-3 bg-slate-50 rounded border border-slate-200">
-                          <p className="text-xs text-slate-600 mb-1">논리 연쇄</p>
-                          <p className="text-sm font-mono text-slate-800">
-                            {wv.logic_chain}
-                          </p>
+                            </div>
+                          )}
                         </div>
 
                         {/* Stats and Actions */}
