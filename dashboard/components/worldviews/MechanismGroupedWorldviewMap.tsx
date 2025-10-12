@@ -185,11 +185,11 @@ export function MechanismGroupedWorldviewMap() {
       <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5">
         <h3 className="text-sm font-bold text-amber-900 mb-2">💡 메커니즘 기반 분석이란?</h3>
         <p className="text-sm text-amber-800 leading-relaxed mb-2">
-          v2.0은 <strong>"무엇에 대한 이야기"</strong>가 아니라 <strong>"어떻게 생각하는가"</strong>로 세계관을 분류합니다.
+          v2.0은 <strong>&ldquo;무엇에 대한 이야기&rdquo;</strong>가 아니라 <strong>&ldquo;어떻게 생각하는가&rdquo;</strong>로 세계관을 분류합니다.
           이민, 범죄, 사법 등 주제가 달라도 같은 사고 패턴을 쓰면 같은 세계관입니다.
         </p>
         <p className="text-xs text-amber-700 italic">
-          예: "증거 없이 즉시 단정 + 과거 투사"는 어떤 주제에서든 반복됩니다.
+          예: &ldquo;증거 없이 즉시 단정 + 과거 투사&rdquo;는 어떤 주제에서든 반복됩니다.
         </p>
       </div>
 

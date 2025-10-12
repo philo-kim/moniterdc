@@ -103,10 +103,10 @@ export function MechanismMatchingExplanation({
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
         <p className="text-xs text-amber-900 leading-relaxed">
           <strong className="font-bold">💡 왜 이렇게 하나요?</strong><br/>
-          "이민 = 범죄"라는 주제로 묶으면 표면만 보입니다.
-          하지만 <strong>"증거 없이 즉시 단정 + 과거 투사 + 네트워크로 확장"</strong>이라는 사고 구조로 묶으면,
+          &ldquo;이민 = 범죄&rdquo;라는 주제로 묶으면 표면만 보입니다.
+          하지만 <strong>&ldquo;증거 없이 즉시 단정 + 과거 투사 + 네트워크로 확장&rdquo;</strong>이라는 사고 구조로 묶으면,
           이민, 범죄, 사법, 경제 등 <strong>모든 주제</strong>에서 <strong>똑같은 패턴</strong>을 발견할 수 있습니다.
-          이것이 진짜 "세계관"입니다.
+          이것이 진짜 &ldquo;세계관&rdquo;입니다.
         </p>
       </div>
     </div>
