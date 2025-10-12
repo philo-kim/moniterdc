@@ -1,0 +1,27 @@
+{
+  "database_structure": {
+    "contents_count": 458,
+    "perceptions_count": 88,
+    "worldviews_count": 9
+  },
+  "coverage": {
+    "content_perception": "9.8%",
+    "perception_worldview": "553.4%"
+  },
+  "data_quality": {
+    "total_claims": 173,
+    "causal_claims": 0,
+    "causal_ratio": "0.0%"
+  },
+  "worldviews": [
+    "독재와 사찰의 부활",
+    "이민 정책과 범죄 증가",
+    "중국 산업 불신",
+    "체제 취약성과 안보 위기",
+    "기타",
+    "온라인 여론 조작",
+    "정치보복과 인권 침해",
+    "복지·보건 카르텔 해체",
+    "표현의 자유 억압"
+  ]
+}

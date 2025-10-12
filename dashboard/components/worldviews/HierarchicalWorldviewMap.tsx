@@ -243,11 +243,11 @@ export function HierarchicalWorldviewMap() {
                           {wv.priority && (
                             <div className="ml-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                                wv.priority === 'high' ? 'bg-red-100 text-red-800 border-red-300' :
-                                wv.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
-                                'bg-green-100 text-green-800 border-green-300'
+                                wv.priority === 'high' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                                wv.priority === 'medium' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                                'bg-slate-100 text-slate-800 border-slate-300'
                               }`}>
-                                {wv.priority === 'high' ? '긴급' : wv.priority === 'medium' ? '주의' : '모니터링'}
+                                {wv.priority === 'high' ? '이해 우선순위: 높음' : wv.priority === 'medium' ? '이해 우선순위: 중간' : '이해 우선순위: 낮음'}
                               </span>
                             </div>
                           )}

@@ -7,10 +7,17 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-)
+// Initialize Supabase client only when needed
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase URL and ANON_KEY are required')
+  }
+
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +26,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = getSupabaseClient()
     const { id } = params
     const { searchParams } = new URL(request.url)
     const regenerate = searchParams.get('regenerate') === 'true'

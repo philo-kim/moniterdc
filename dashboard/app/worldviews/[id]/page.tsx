@@ -12,8 +12,12 @@ import {
   Eye,
   Brain,
   Heart,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
+import { InterpretationComparison } from '@/components/worldviews/InterpretationComparison'
+import { LogicChainVisualizer } from '@/components/worldviews/LogicChainVisualizer'
 
 interface ExplicitClaim {
   subject: string
@@ -53,6 +57,16 @@ interface ParsedFrame {
   category: string
   subcategory: string
   description: string
+  narrative?: {
+    summary?: string
+    examples?: Array<{
+      case: string
+      dc_interpretation: string
+      normal_interpretation: string
+      gap: string
+    }>
+    logic_chain?: string
+  }
   metadata?: {
     merged_from?: string[]
     estimated_count?: number
@@ -64,22 +78,22 @@ function PriorityBadge({ priority }: { priority?: 'high' | 'medium' | 'low' }) {
 
   const config = {
     high: {
-      bg: 'bg-red-100',
-      text: 'text-red-800',
-      border: 'border-red-300',
-      label: '긴급 대응 필요'
+      bg: 'bg-blue-100',
+      text: 'text-blue-800',
+      border: 'border-blue-300',
+      label: '이해 우선순위: 높음'
     },
     medium: {
-      bg: 'bg-yellow-100',
-      text: 'text-yellow-800',
-      border: 'border-yellow-300',
-      label: '주의 필요'
+      bg: 'bg-purple-100',
+      text: 'text-purple-800',
+      border: 'border-purple-300',
+      label: '이해 우선순위: 중간'
     },
     low: {
-      bg: 'bg-green-100',
-      text: 'text-green-800',
-      border: 'border-green-300',
-      label: '모니터링'
+      bg: 'bg-slate-100',
+      text: 'text-slate-800',
+      border: 'border-slate-300',
+      label: '이해 우선순위: 낮음'
     }
   }
 
@@ -99,6 +113,8 @@ export default function WorldviewDetailPage() {
   const [worldview, setWorldview] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const [showAllContents, setShowAllContents] = useState(false)
+  const [expandedContentIds, setExpandedContentIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function loadData() {
@@ -136,7 +152,7 @@ export default function WorldviewDetailPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-          <p className="text-red-600 font-semibold">공격 유형을 불러올 수 없습니다</p>
+          <p className="text-red-600 font-semibold">세계관 데이터를 불러올 수 없습니다</p>
           <Link href="/" className="text-blue-600 hover:underline mt-2 inline-block">
             목록으로 돌아가기
           </Link>
@@ -160,6 +176,26 @@ export default function WorldviewDetailPage() {
     }
   })
 
+  // Representative perception (첫 번째 것 사용)
+  const representativePerception = layeredPerceptions[0]
+
+  // Representative contents (대표 사례 5개)
+  const representativeContents = contents.slice(0, 5)
+  const remainingContents = contents.slice(5)
+  const displayedContents = showAllContents ? contents : representativeContents
+
+  const toggleContentExpanded = (contentId: string) => {
+    setExpandedContentIds(prev => {
+      const next = new Set(prev)
+      if (next.has(contentId)) {
+        next.delete(contentId)
+      } else {
+        next.add(contentId)
+      }
+      return next
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -169,7 +205,7 @@ export default function WorldviewDetailPage() {
           className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          공격 유형 목록으로 돌아가기
+          세계관 지도로 돌아가기
         </Link>
 
         {/* Header */}
@@ -234,20 +270,49 @@ export default function WorldviewDetailPage() {
           </div>
         </div>
 
-        {/* Source Contents with 3-Layer Analysis */}
+        {/* 🎯 핵심 구조: 3층 논리 연쇄 */}
+        {representativePerception && representativePerception.explicit_claims && (
+          <LogicChainVisualizer
+            explicit_claims={representativePerception.explicit_claims}
+            implicit_assumptions={representativePerception.implicit_assumptions || []}
+            deep_beliefs={representativePerception.deep_beliefs || []}
+          />
+        )}
+
+        {/* 🔍 해석 차이 비교 */}
+        {frame.narrative?.examples && frame.narrative.examples.length > 0 && (
+          <InterpretationComparison
+            examples={frame.narrative.examples}
+            category={frame.category}
+          />
+        )}
+
+        {/* 📊 대표 사례 */}
         {contents.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <h2 className="text-xl font-bold text-slate-900">
-                원본 글 및 3층 구조 분석 ({contents.length}개)
-              </h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                <h2 className="text-xl font-bold text-slate-900">
+                  대표 사례 {showAllContents ? `(전체 ${contents.length}개)` : `(${representativeContents.length}개)`}
+                </h2>
+              </div>
+              {remainingContents.length > 0 && (
+                <button
+                  onClick={() => setShowAllContents(!showAllContents)}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  {showAllContents ? '대표 사례만 보기' : `전체 ${contents.length}개 보기`}
+                </button>
+              )}
             </div>
             <p className="text-sm text-slate-600 mb-6">
-              이 공격 유형이 발견된 DC Gallery 글들과 3층 심층 분석 결과입니다
+              {showAllContents
+                ? '이 세계관이 발견된 모든 원본 글입니다'
+                : '이 세계관을 가장 잘 보여주는 대표적인 사례들입니다'}
             </p>
             <div className="space-y-6">
-              {contents.map((content) => {
+              {displayedContents.map((content) => {
                 const contentPerceptions = perceptionsByContent.get(content.id) || []
                 const dateToUse = content.published_at || content.created_at
                 const publishedDate = dateToUse
@@ -257,6 +322,7 @@ export default function WorldviewDetailPage() {
                       day: 'numeric'
                     })
                   : '날짜 미상'
+                const isExpanded = expandedContentIds.has(content.id)
 
                 return (
                   <div
@@ -283,19 +349,30 @@ export default function WorldviewDetailPage() {
                           </span>
                         </div>
                       </div>
-                      <a
-                        href={content.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
-                      >
-                        <span>원문 보기</span>
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
+                      <div className="flex gap-2">
+                        <a
+                          href={content.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                        >
+                          <span>원문 보기</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                        {contentPerceptions.length > 0 && (
+                          <button
+                            onClick={() => toggleContentExpanded(content.id)}
+                            className="flex-shrink-0 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2 text-sm font-medium"
+                          >
+                            <span>{isExpanded ? '분석 접기' : '분석 펼치기'}</span>
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* 3-Layer Analysis */}
-                    {contentPerceptions.length > 0 && (
+                    {contentPerceptions.length > 0 && isExpanded && (
                       <div className="mt-4 pt-4 border-t-2 border-slate-200 space-y-4">
                         {contentPerceptions.slice(0, 1).map((lp, idx) => (
                           <div key={idx} className="space-y-4">
@@ -352,32 +429,32 @@ export default function WorldviewDetailPage() {
 
                             {/* Reasoning Gaps (논리 비약) */}
                             {lp.reasoning_gaps && lp.reasoning_gaps.length > 0 && (
-                              <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+                              <div className="bg-amber-50 rounded-lg p-4 border-2 border-amber-200">
                                 <div className="flex items-center gap-2 mb-3">
-                                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                                  <h4 className="font-bold text-red-900">
-                                    논리 비약 (Reasoning Gaps) - 반박 포인트
+                                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                                  <h4 className="font-bold text-amber-900">
+                                    논리 연결 (Reasoning Gaps) - 해석 차이 지점
                                   </h4>
                                 </div>
                                 <div className="space-y-3">
                                   {lp.reasoning_gaps.map((gap, i) => (
-                                    <div key={i} className="bg-white rounded p-3 border border-red-200">
+                                    <div key={i} className="bg-white rounded p-3 border border-amber-200">
                                       <div className="space-y-2">
                                         <div className="flex items-start gap-2">
                                           <span className="text-xs font-semibold text-slate-500 mt-0.5">FROM:</span>
                                           <p className="text-sm text-slate-700 flex-1">{gap.from}</p>
                                         </div>
                                         <div className="flex items-center justify-center">
-                                          <div className="text-red-600 text-lg">↓</div>
+                                          <div className="text-amber-600 text-lg">↓</div>
                                         </div>
                                         <div className="flex items-start gap-2">
                                           <span className="text-xs font-semibold text-slate-500 mt-0.5">TO:</span>
                                           <p className="text-sm text-slate-700 flex-1">{gap.to}</p>
                                         </div>
-                                        <div className="mt-3 pt-3 border-t border-red-200">
+                                        <div className="mt-3 pt-3 border-t border-amber-200">
                                           <div className="flex items-start gap-2">
-                                            <span className="text-xs font-semibold text-red-600 mt-0.5">GAP:</span>
-                                            <p className="text-sm text-red-900 font-medium flex-1">{gap.gap}</p>
+                                            <span className="text-xs font-semibold text-amber-700 mt-0.5">해석 차이:</span>
+                                            <p className="text-sm text-amber-900 font-medium flex-1">{gap.gap}</p>
                                           </div>
                                         </div>
                                       </div>

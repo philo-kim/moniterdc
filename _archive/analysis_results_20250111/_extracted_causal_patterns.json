@@ -1,0 +1,368 @@
+[
+  {
+    "found": true,
+    "trigger": "강훈식 대통령비서실장이 '김현지 실세론'에 반박하며 '내가 실세다'라고 주장한 사건",
+    "inference": "강훈식이 실세라는 주장을 통해 김현지가 실세가 아님을 시사한다",
+    "assumption": "대통령비서실장이 실세가 아니면 그 사람의 실세론은 근거가 없다는 가정",
+    "generalization": "'실세'라는 자리에 있는 사람은 항상 그 자리에 있는 모든 다른 사람을 '실세'가 아닐 것이라 일반화할 수 있다",
+    "evidence_included": [
+      "강훈식의 주장 '내가 실세다'",
+      "'김현지 실세론에 반박'이라는 주장"
+    ],
+    "evidence_excluded": [
+      "김현지가 실세일 수도 있다는 가능성",
+      "강훈식이 진정 실세일 필요는 없음"
+    ],
+    "pattern_title": "주장 대 반박의 인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "c52366b1-9f6f-49c3-b435-289a07609ce0",
+    "content_title": "강훈식의 처절한 김현지 지키기 ㅋㅋ 눈물겹다 시발"
+  },
+  {
+    "found": true,
+    "trigger": "강훈식 대통령비서실장이 '제가 실세'라며 반박",
+    "inference": "김현지 제1부속실장이 실세가 아니라는 주장이 제기됨",
+    "assumption": "강훈식의 반박이 실제로 김현지가 실세가 아니라는 증거가 된다",
+    "generalization": "비서실장이 반박하면 반대 주장이 항상 진실이 아니게 된다",
+    "evidence_included": [
+      "김현지 대통령실 제1부속실장이 '그림자 실세'라는 야당의 공세",
+      "강훈식의 '제가 실세' 발언"
+    ],
+    "evidence_excluded": [
+      "실세 여부에 대한 명확한 증거가 없음",
+      "다른 사람들의 실세 여부에 대한 언급이 없음"
+    ],
+    "pattern_title": "반박을 통한 인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "da04670b-c811-4683-b52a-a6bb8dadc90c",
+    "content_title": "강훈식의 처절한 김현지 지키기 ㅋㅋ 눈물겹다 시발"
+  },
+  {
+    "found": true,
+    "trigger": "환승입국 제도",
+    "inference": "관광 활성화와 국경 안전 사이의 균형을 잘 맞추었다, 위험을 단계적으로 관리하는 제도였다",
+    "assumption": "환승입국 제도가 관광 활성화와 안전을 동시에 보장한다는 전제가 있다",
+    "generalization": "환승입국 제도는 항상 관광과 안전을 동시에 고려한다",
+    "evidence_included": [
+      "환승입국 제도는 관광 진작 차원에서 다시 열렸다",
+      "특정 단체에 대해 15일 체류를 허용하는 조건이 있다"
+    ],
+    "evidence_excluded": [
+      "중국 단체 무비자 입국 정책에 대한 비교 및 그로 인한 위험성",
+      "환승입국 제도를 통한 위험 요소가 실제로 분산되었는지에 대한 실증적 증거"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "ba3a0449-7e44-42ea-92ca-e663c66636a9",
+    "content_title": "중국인 무비자 정책을 윤석열 정부에서 시행했다고 선동하는 빡대가리들에게"
+  },
+  {
+    "found": true,
+    "trigger": "중국 단체 무비자 입국 정책",
+    "inference": "중국 단체 무비자 입국 정책이 불법체류, 치안, 사회갈등 위험을 증가시킨다",
+    "assumption": "중국 단체 무비자 입국자가 반드시 이러한 문제를 야기할 것이라는 것",
+    "generalization": "중국 단체 무비자 입국자는 항상 불법체류, 치안, 사회갈등과 연관된다",
+    "evidence_included": [
+      "중국 단체 무비자 입국 정책에 따른 불법체류, 치안, 사회갈등 위험이 더 크다는 주장"
+    ],
+    "evidence_excluded": [
+      "다른 국적의 입국 정책에서 발생하는 문제는 고려하지 않음",
+      "중국 단체 무비자 입국자가 반드시 문제를 일으킨다는 점에 대한 반증 없음"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 8,
+    "perception_id": "2b8ad875-acce-464d-a719-5164916bd9e5",
+    "content_title": "중국인 무비자 정책을 윤석열 정부에서 시행했다고 선동하는 빡대가리들에게"
+  },
+  {
+    "found": true,
+    "trigger": "나라의 올바른 언론매체를 위해 사명감 있게 일했다",
+    "inference": "그가 과거의 대의를 잊고 과장된 존재로 변모했다",
+    "assumption": "사명감 있게 일했던 사람이 반드시 대의를 잊고 변모한다",
+    "generalization": "사명감 있게 일한 사람은 언제나 부정적인 결과로 이어진다",
+    "evidence_included": [
+      "나라의 올바른 언론매체를 위해 사명감 있게 일했다",
+      "과거의 대의를 잊고 과장된 존재로 변모했다"
+    ],
+    "evidence_excluded": [
+      "그가 다른 이유로 변모했을 가능성",
+      "사람들이 모두 과장된 존재로 변모하는 것은 아님"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "72c55d5c-7ae1-4a49-8228-ad629a9a7a4a",
+    "content_title": "오늘 ㅉ이 한 가장 큰 실수"
+  },
+  {
+    "found": true,
+    "trigger": "이태원 사고",
+    "inference": "미군들은 도움을 주고 댓가를 바라지 않았다",
+    "assumption": "모든 미군들이 이태원 사고에서 도움을 주었고, 만약 도왔다면 반드시 댓가를 바라지 않는다",
+    "generalization": "미군들은 항상 댓가 없이 도와준다",
+    "evidence_included": [
+      "이태원 사고 때 도움을 주었다",
+      "댓가를 바라지 않았다"
+    ],
+    "evidence_excluded": [
+      "미군이 도움을 주지 않은 사례",
+      "도움에 대한 댓가를 바란 경우"
+    ],
+    "pattern_title": "과도한 일반화",
+    "confidence": 7,
+    "perception_id": "9495837b-c95b-4d5c-a9f9-597ca8e64d31",
+    "content_title": "미군한테 진짜 너무 감사함"
+  },
+  {
+    "found": true,
+    "trigger": "중국인 무비자 정책",
+    "inference": "아동실종 사건이 초래될 수 있다",
+    "assumption": "중국인 무비자 정책이 범죄를 유발하거나 증가시킨다",
+    "generalization": "중국인 무비자와 관련된 범죄는 항상 아동실종 사건을 일으킨다",
+    "evidence_included": [
+      "최근 아동실종 사건 발생 증가"
+    ],
+    "evidence_excluded": [
+      "중국인 무비자 정책과 아동실종 사건 간의 직접적 연관성에 대한 연구 결과"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 6,
+    "perception_id": "e1ad30a3-fce0-4b67-9c76-4cefcdf6dbe7",
+    "content_title": "맘카페 집회를 만드는건 어떻냐"
+  },
+  {
+    "found": true,
+    "trigger": "아동실종사건의 증가와 맘카페에서의 탄압",
+    "inference": "부모들이 적극적으로 목소리를 내지 않으면 아동 안전 문제가 더욱 심각해질 것이다.",
+    "assumption": "부모들이 목소리를 내지 않지 않으면 아동의 안전이 보장되지 않을 것이라는 가정.",
+    "generalization": "부모들은 언제나 아동의 안전 문제에 대해 목소리를 내야 한다.",
+    "evidence_included": [
+      "아동실종사건이 수 없이 많이 일어나고 있다",
+      "맘카페에서 탄압당하는 상황"
+    ],
+    "evidence_excluded": [
+      "부모들이 목소리를 내지 않는 것이 실제로 아동 안전에 미치는 영향",
+      "다른 방법으로 아동 안전을 확보할 가능성"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "1612025c-7172-453f-9ea5-ecc99762f48b",
+    "content_title": "맘카페 집회를 만드는건 어떻냐"
+  },
+  {
+    "found": true,
+    "trigger": "아동실종사건의 증가",
+    "inference": "부모들이 청년단체에 참여해야 한다",
+    "assumption": "부모들이 아동실종사건에 대해 대응하기 위해서는 청년단체에 참여하는 것이 필요하다",
+    "generalization": "모든 부모는 아동실종사건에 대해 적극적으로 행동해야 한다",
+    "evidence_included": [
+      "우파 청년단체가 생겨서 활동하고 있다",
+      "부모들도 참여할 수 있다"
+    ],
+    "evidence_excluded": [
+      "부모가 아닌 다른 시민들도 참여할 수 있다",
+      "타 단체나 다른 방식으로도 대응할 수 있다"
+    ],
+    "pattern_title": "부모의 대응 필요성",
+    "confidence": 7,
+    "perception_id": "7712b6a1-a683-4266-a84b-e06732b371c0",
+    "content_title": "맘카페 집회를 만드는건 어떻냐"
+  },
+  {
+    "found": true,
+    "trigger": "중국인 무비자 입국과 실종신고 급증",
+    "inference": "중국 장기밀매조직이 국내에 잠입할 가능성이 있다",
+    "assumption": "실종신고의 급증이 중국 장기밀매조직의 존재와 관련이 있다",
+    "generalization": "실종신고가 증가하면 장기밀매조직의 존재가 항상 의심된다",
+    "evidence_included": [
+      "중국인 무비자 입국",
+      "실종신고 급증"
+    ],
+    "evidence_excluded": [
+      "실종신고의 다른 원인들 (예: 실종 사건 증가, 사회적 문제 등)"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "92e71a12-9b40-462c-b145-80d6589656b3",
+    "content_title": "이영돈 신작 충격적이네ㄷㄷ 다들 꼭 봐라"
+  },
+  {
+    "found": true,
+    "trigger": "구독자가 급증하고 있다",
+    "inference": "이영돈tv의 콘텐츠나 사건과 관련하여 긍정적인 반응이 생겼다",
+    "assumption": "구독자의 급증은 반드시 콘텐츠가 흥미롭거나 중요한 내용을 포함하고 있다는 것을 의미한다",
+    "generalization": "구독자는 항상 급증하면 긍정적인 반응이 있는 것이다",
+    "evidence_included": [
+      "구독자가 급증하고 있다"
+    ],
+    "evidence_excluded": [
+      "구독자의 증가가 외부 요인(예: 다른 유튜브 채널의 홍보, 다른 사건의 영향 등)으로 발생했을 가능성"
+    ],
+    "pattern_title": "비약적 인과관계",
+    "confidence": 6,
+    "perception_id": "793f6fb5-e28f-4f31-a922-5f68f19589f1",
+    "content_title": "이영돈 신작 충격적이네ㄷㄷ 다들 꼭 봐라"
+  },
+  {
+    "found": true,
+    "trigger": "더불어민주당이 특정 종교단체와의 연계 의혹에 휘말렸다",
+    "inference": "김민석 국무총리를 지원하려 했다는 의혹이 제기되었다",
+    "assumption": "민주당이 종교단체와의 연계 의혹에 휘말린 것은 김민석 지원과 관련이 있다",
+    "generalization": "어떤 정치적 의도가 있으면 특정 종교단체와 연계될 수 있다",
+    "evidence_included": [
+      "국민의힘이 문제를 제기했다",
+      "정청래가 철저한 진상조사를 지시했다"
+    ],
+    "evidence_excluded": [
+      "민주당이 종교단체에 의한 지원을 실제로 받았는지",
+      "김민석과 종교단체 간의 직접적인 연결 고리"
+    ],
+    "pattern_title": "인과관계 왜곡",
+    "confidence": 7,
+    "perception_id": "14b361d7-b1eb-4a8e-905c-c0af9569319d",
+    "content_title": "진종오가 김민석 터뜨린거"
+  },
+  {
+    "found": true,
+    "trigger": "김민석을 희생양으로 내던지려 한다",
+    "inference": "언론의 시선을 돌리고 싶어한다",
+    "assumption": "김민석을 희생양으로 내던지면 언론의 시선을 돌릴 수 있다",
+    "generalization": "언론의 시선을 돌리기 위해서 희생양을 필요로 한다",
+    "evidence_included": [
+      "국민의힘의 의혹 제기 및 진상 조사 지시",
+      "김민석 지지를 위한 종교단체 신도 동원 의혹"
+    ],
+    "evidence_excluded": [
+      "김민석을 희생양으로 만들 이유 없이 언론의 시선을 돌리려는 전략",
+      "종교단체와의 연결이 실제로 언론의 시선에 영향을 줄까"
+    ],
+    "pattern_title": "인과 관계 왜곡: 희생양 생산",
+    "confidence": 8,
+    "perception_id": "19230882-f5f9-4240-893b-588e0c26bf33",
+    "content_title": "진종오가 김민석 터뜨린거"
+  },
+  {
+    "found": true,
+    "trigger": "김민석이 언론에서 주목받고 있다",
+    "inference": "김민석이 언론의 시선을 돌리기 위한 희생양으로 이용되고 있다",
+    "assumption": "언론의 관심이 특정 인물이나 사건에 쏠릴 경우, 정치적 의도가 개입할 필요가 있다",
+    "generalization": "정치적 사건에서는 항상 언론의 주목이 중요한 역할을 한다",
+    "evidence_included": [
+      "김민석을 희생양으로 내던질 만큼 언론의 시선을 돌리고 싶은 뭔가가 있다",
+      "국힘 일반의원들은 민주당을 사람취급도 안하는 상황"
+    ],
+    "evidence_excluded": [
+      "김민석이 언론에서 주목받는 이유가 다른 정치적 요인일 수 있음",
+      "진종오 의원의 발언이 기사의 이슈와 직접적인 연관이 없을 수 있음"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "4752b528-50e4-4519-b365-fed1ae197cf4",
+    "content_title": "진종오가 김민석 터뜨린거"
+  },
+  {
+    "found": true,
+    "trigger": "국정자원 화재",
+    "inference": "이번 화재는 대응이 미흡하였고, 의도적으로 방치되었다",
+    "assumption": "정부가 의도적으로 화재를 방치하였다",
+    "generalization": "모든 국가안보위기 사건에 대해 정부의 대응은 항상 느리거나 미흡하다",
+    "evidence_included": [
+      "국정자원 화재는 국가안보위기 '심각' 단계로 격상되었다",
+      "박근혜 대통령이 세월호 사건 당시 스케줄을 취소하고 현장에 갔음에도 불구하고, 이번 화재에 대한 대응이 미흡했다"
+    ],
+    "evidence_excluded": [
+      "화재 발생에 대한 정부의 공식적인 설명이나 대응 전략",
+      "국정자원 화재와 짱깨 무비자 입국 시행일과의 직접적인 연관성에 대한 명확한 증거"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "3a38f4c6-e60e-40a2-be3f-d20648b2ec0e",
+    "content_title": "이거 공론화 한번 하자"
+  },
+  {
+    "found": true,
+    "trigger": "국정자원 화재",
+    "inference": "JTBC의 예능 촬영이 부적절하다고 여겨진다",
+    "assumption": "위기 상황에서는 모든 방송 활동이 중단되어야 한다",
+    "generalization": "위기 상황에서는 언제나 방송사가 예능 프로그램을 진행해서는 안 된다",
+    "evidence_included": [
+      "국정자원 화재가 발생한 상황에서 JTBC가 예능 촬영을 진행한 것은 부적절하다",
+      "JTBC의 보도가 사건의 심각성을 간과하고 있다"
+    ],
+    "evidence_excluded": [
+      "JTBC가 예능 촬영을 통해 국민들에게 정보를 전달할 수 있는 방식이었을 수도 있다",
+      "다른 방송 매체들이 유사한 상황에서 어떤 행동을 했는지에 대한 정보가 없다"
+    ],
+    "pattern_title": "위기 상황에서의 행동 일반화",
+    "confidence": 7,
+    "perception_id": "7ef0b6ad-520d-433a-893f-80ba1a018e7d",
+    "content_title": "이거 공론화 한번 하자"
+  },
+  {
+    "found": true,
+    "trigger": "박근혜 대통령의 7시간 행적과 세월호 사건",
+    "inference": "국민들이 우려하는 정부의 대응 방안이 정치적 행위에 영향을 미칠 수 있다",
+    "assumption": "정부가 사건에 대한 신뢰를 유지하지 못할 경우 정치에 대한 무관심이 깨질 것이다",
+    "generalization": "정치적 무관심은 큰 사건에 의해 언제나 깨질 수 있다",
+    "evidence_included": [
+      "박근혜 대통령의 7시간 행적이 문제시되었던 사회적 분위기"
+    ],
+    "evidence_excluded": [
+      "다른 정치적 사건들이나 개인의 정치적 무관심에 대한 추가 증거"
+    ],
+    "pattern_title": "정치적 무관심과 사건 간의 인과 관계 왜곡",
+    "confidence": 7,
+    "perception_id": "1fc43cbe-2e66-41c3-8114-e280c662695a",
+    "content_title": "이거 공론화 한번 하자"
+  },
+  {
+    "found": true,
+    "trigger": "공대함유도탄-Ⅱ 사업의 중단",
+    "inference": "KF-21의 독침이 사라질 가능성이 있다",
+    "assumption": "공대함유도탄-Ⅱ 사업이 KF-21의 독침 개발에 필수적이다",
+    "generalization": "공대함유도탄-Ⅱ가 없으면 KF-21의 독침이 없다",
+    "evidence_included": [
+      "KF-21 '보라매'에 장착 예정이었던 '공대함유도탄-Ⅱ 사업'이 중단되었다"
+    ],
+    "evidence_excluded": [
+      "KF-21 독침의 다른 개발 경로나 대체 수단이 존재할 가능성"
+    ],
+    "pattern_title": "필수 조건 왜곡",
+    "confidence": 7,
+    "perception_id": "02900539-fe62-4aea-b0fa-1cb85ae3e24c",
+    "content_title": "초음속 공대함 미사일 사업 중단… KF-21 ‘독침’ 사라지나"
+  },
+  {
+    "found": true,
+    "trigger": "북한이 해상 핵전력을 확장하고 있다",
+    "inference": "KF-21 '보라매'의 공대함유도탄-Ⅱ 사업이 중단되었다",
+    "assumption": "해상 핵전력의 확장이 KF-21 사업 중단에 직접적으로 영향을 미친다",
+    "generalization": "북한의 군사적 행동은 항상 한국의 방위 사업에 영향을 미친다",
+    "evidence_included": [
+      "북한이 해상 핵전력을 확장하고 있다는 주장이 사업 중단의 원인으로 제시됨"
+    ],
+    "evidence_excluded": [
+      "KF-21 사업 중단의 다른 가능성 (예: 예산 부족, 기술 문제 등)"
+    ],
+    "pattern_title": "인과 관계 왜곡",
+    "confidence": 6,
+    "perception_id": "ca00d32f-a35d-4d0d-8cfa-41522f50a807",
+    "content_title": "초음속 공대함 미사일 사업 중단… KF-21 ‘독침’ 사라지나"
+  },
+  {
+    "found": true,
+    "trigger": "중국이 극음속 무기를 개발하고 있다",
+    "inference": "그로 인해 한국은 초음속 공대함 미사일 사업을 중단하게 되었다",
+    "assumption": "중국의 극음속 무기 개발이 한국의 방위사업 결정에 직접적인 영향을 미친다",
+    "generalization": "중국이 무기를 개발하면 한국은 항상 방어력을 강화하기 위해 사업을 중단한다",
+    "evidence_included": [
+      "중국의 극음속 무기 개발 사실"
+    ],
+    "evidence_excluded": [
+      "한국의 사업 중단이 중국의 무기 개발 이외의 다른 요인 때문일 수 있다"
+    ],
+    "pattern_title": "간접적 인과관계 왜곡",
+    "confidence": 6,
+    "perception_id": "db54ee1e-0b83-409b-a6c5-ab393c0e2793",
+    "content_title": "초음속 공대함 미사일 사업 중단… KF-21 ‘독침’ 사라지나"
+  }
+]

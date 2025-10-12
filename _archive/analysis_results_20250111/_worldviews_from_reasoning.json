@@ -1,0 +1,99 @@
+[
+  {
+    "name": "민주당/좌파의 정보 파악 즉시 불법 해석",
+    "consistency_pattern": "정보_파악_불법_해석",
+    "supporting_perceptions": 9,
+    "primary_mechanisms": [
+      "즉시_단정",
+      "역사_투사",
+      "필연적_인과"
+    ],
+    "primary_actor": "민주당/좌파",
+    "primary_purpose": "권력 유지",
+    "common_methods": [
+      "사찰",
+      "협박",
+      "정보 수집"
+    ],
+    "perception_ids": [
+      "cbaebb35-7849-4638-8c41-cd41482f67e5",
+      "d7a62f33-2345-4a7a-8fd9-97fd81613534",
+      "d58c72b4-d7a8-4c54-bfb4-a3ca8a93a8ee",
+      "6e703dc4-ed3f-4bb0-98ba-5226362375b2",
+      "81476e9a-7f96-4e08-9769-95eb99a8a1c2",
+      "ee765166-48c2-43ce-a0f4-ecd2636d7962",
+      "d3772cb4-724a-4e54-a9bb-da4e8eb64e3e",
+      "a52833d5-afc1-4a4b-81dd-c74a6e7c6e15",
+      "a5f86969-2a50-472d-bd73-15b628e05f79"
+    ]
+  },
+  {
+    "name": "좌파(진보 성향 시위대) 행위 패턴 해석",
+    "consistency_pattern": "관찰_즉시_단정",
+    "supporting_perceptions": 6,
+    "primary_mechanisms": [
+      "즉시_단정",
+      "네트워크_추론",
+      "역사_투사"
+    ],
+    "primary_actor": "좌파(진보 성향 시위대)",
+    "primary_purpose": "보수·애국 진영의 상징과 도덕적 정당성을 무너뜨리기",
+    "common_methods": [
+      "소음 방해",
+      "정치적 메시지 사용",
+      "온라인 조직 동원"
+    ],
+    "perception_ids": [
+      "c2ba6d44-d0a2-4be1-a605-5649ad5e6330",
+      "dfd6c4af-d438-417f-aa52-81e66d8b21b0",
+      "5b013ef9-a2a7-4715-ac52-bb31178e98ba",
+      "5d16c127-f50f-4641-99aa-6e6438b27d52",
+      "7a09608a-059c-49ba-bf4a-feec9e78ff55",
+      "298c6c33-472e-413c-977f-0c67a1c3207a"
+    ]
+  },
+  {
+    "name": "국내 수사기관 및 권력 행위 패턴 해석",
+    "consistency_pattern": "과거_패턴_반복",
+    "supporting_perceptions": 4,
+    "primary_mechanisms": [
+      "즉시_단정",
+      "역사_투사",
+      "네트워크_추론"
+    ],
+    "primary_actor": "국내 수사기관 및 권력",
+    "primary_purpose": "백두혈통 보호 및 비판자 억압",
+    "common_methods": [
+      "체포",
+      "정보 은폐",
+      "법적 절차 왜곡"
+    ],
+    "perception_ids": [
+      "76db7117-e4a7-4354-93b8-5ee9964dba12",
+      "7c43e219-e2c7-43dd-b8ce-e2d553f2cda7",
+      "55090951-40dc-49b6-98a9-38665a76e1ad",
+      "71ede9ad-c58a-454a-8e2c-62aa7f8f4915"
+    ]
+  },
+  {
+    "name": "좌파 성향 주류 언론과 공권력 행위 패턴 해석",
+    "consistency_pattern": "관찰_의도적_해석",
+    "supporting_perceptions": 2,
+    "primary_mechanisms": [
+      "즉시_단정",
+      "역사_투사",
+      "네트워크_추론"
+    ],
+    "primary_actor": "좌파 성향 주류 언론과 공권력",
+    "primary_purpose": "여론 설계 및 불리한 진실 은폐",
+    "common_methods": [
+      "조작",
+      "프레이밍",
+      "증거 인멸"
+    ],
+    "perception_ids": [
+      "bf8fe07d-108e-4146-9b06-27e41ceea56d",
+      "9dbab951-42e1-4406-9883-cba4b5de9ccc"
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "layer01": {
+    "tested": 0,
+    "avg_score": 0,
+    "status": "FAIL"
+  },
+  "layer12": {
+    "tested": 3,
+    "avg_score": 7.333333333333333,
+    "status": "PASS"
+  },
+  "layer23": {
+    "enhanced": 5,
+    "status": "COMPLETED"
+  },
+  "end_to_end": {
+    "tested": 3,
+    "improvement_avg": 7.333333333333333
+  }
+}

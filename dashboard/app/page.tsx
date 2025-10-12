@@ -9,11 +9,13 @@ export default function HomePage() {
         {/* Header */}
         <header className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-slate-900 mb-3">
-            DC Gallery 세계관 분석 시스템
+            담론 세계관 분석 시스템
           </h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            DC Gallery 정치 담론의 세계관 구조를 분석하고,
-            여당 지지자들이 이해할 수 있도록 맥락과 반박 논리를 제공합니다
+            같은 사건을 보고도 완전히 다르게 해석하는 이유를 이해하기 위한 인식론적 분석 도구
+          </p>
+          <p className="text-sm text-slate-500 mt-3">
+            &ldquo;상대방은 틀린 게 아니라, 다른 세계를 산다&rdquo;
           </p>
         </header>
 

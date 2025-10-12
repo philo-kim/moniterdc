@@ -1,0 +1,89 @@
+{
+  "original": "\n유심교체를 어떻게 알아ㅋㅋㅋㅋ미친\n지들 맘에 안드는 판사 사찰하려고 통신사 협박해서 얻어낸 정보\n",
+  "versions": {
+    "v1": {
+      "claims": [
+        "법원이 통신사 정보를 통해 판사를 부당하게 조사하고 있다는 주장"
+      ]
+    },
+    "v2": {
+      "claims": [
+        "유심교체를 어떻게 알아",
+        "지들 맘에 안드는 판사 사찰하려고 통신사 협박"
+      ]
+    },
+    "v3": {
+      "key_questions": [
+        "유심교체를 어떻게 알아ㅋㅋㅋㅋ미친"
+      ],
+      "specific_expressions": [
+        "유심교체",
+        "판사 사찰",
+        "통신사 협박",
+        "얻어낸 정보"
+      ],
+      "logic_structure": {
+        "from": "지들 맘에 안드는 판사 사찰하려고",
+        "to": "통신사 협박해서 얻어낸 정보",
+        "connection": "판사를 사찰하기 위해 정보를 얻어냈다는 주장"
+      },
+      "preserved_claims": [
+        "지들 맘에 안드는 판사 사찰하려고 통신사 협박해서 얻어낸 정보"
+      ]
+    },
+    "v4": {
+      "preserved_text": [
+        "어떻게 알아ㅋㅋㅋㅋ미친",
+        "지들 맘에 안드는",
+        "통신사 협박해서 얻어낸 정보"
+      ],
+      "key_question": "유심교체를 어떻게 알아ㅋㅋㅋㅋ미친",
+      "specific_actors": [
+        "판사",
+        "통신사"
+      ],
+      "specific_actions": [
+        "사찰하려고",
+        "통신사 협박해서 얻어낸"
+      ],
+      "logic_chain": [
+        {
+          "step": "지들 맘에 안드는 판사",
+          "next": "사찰하려고"
+        },
+        {
+          "step": "사찰하려고",
+          "next": "통신사 협박해서 얻어낸 정보"
+        }
+      ]
+    }
+  },
+  "evaluation": {
+    "v1_score": {
+      "specificity": 4,
+      "key_question": false,
+      "specific_expr": false
+    },
+    "v2_score": {
+      "specificity": 7,
+      "key_question": false,
+      "specific_expr": true
+    },
+    "v3_score": {
+      "specificity": 9,
+      "key_question": true,
+      "specific_expr": true
+    },
+    "best": "v3",
+    "why": "V3는 원문의 구체적인 표현들을 대부분 유지하고 있으며, '유심교체를 어떻게 알아'라는 핵심 질문과 '지들 맘에 안드는'과 같은 특정 표현도 잘 보존되고 있습니다. 또한 원문의 논리적 구조를 잘 반영하여 정보 획득의 과정을 설명하고 있습니다.",
+    "improvement_needed": "V1과 V2의 경우, 원문에서 제기된 질문이나 특정 표현들이 충분히 보존되지 않고 있습니다. V1은 구체적인 표현이 부족하며, V2는 핵심 질문을 놓치고 있습니다. 두 가지 버전 모두 원문에서 중요하게 다루어진 논리 구조를 더 명확하게 드러내는 방향으로 개선될 필요가 있습니다."
+  },
+  "verification": {
+    "question_preserved": true,
+    "expression_preserved": false,
+    "action_preserved": true,
+    "overall_specificity": 8,
+    "success": false,
+    "next_improvement": "표현 '지들 맘에 안드는 판사' 요소가 누락되었습니다. 전체 문맥을 고려하여 특정 표현을 정확하게 보존하도록 추출 시스템을 개선할 필요가 있습니다."
+  }
+}
