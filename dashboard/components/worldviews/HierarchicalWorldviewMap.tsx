@@ -8,8 +8,9 @@
  */
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronRight, MessageSquare, Target, AlertTriangle } from 'lucide-react'
+import { ChevronDown, ChevronRight, MessageSquare, Target, AlertTriangle, User } from 'lucide-react'
 import Link from 'next/link'
+import { MechanismList, type MechanismType } from './MechanismBadge'
 
 interface Worldview {
   id: string
@@ -17,6 +18,8 @@ interface Worldview {
   frame: string
   total_perceptions: number
   strength_overall: number
+  core_subject?: string
+  core_attributes?: MechanismType[]
 }
 
 interface ParsedFrame {
@@ -39,6 +42,8 @@ interface CategoryGroup {
     priority?: 'high' | 'medium' | 'low'
     total_perceptions: number
     strength: number
+    core_subject?: string
+    core_mechanisms?: MechanismType[]
   }[]
   total_perceptions: number
 }
@@ -112,7 +117,9 @@ export function HierarchicalWorldviewMap() {
         description: frame.description,
         priority: frame.priority,
         total_perceptions: wv.total_perceptions,
-        strength: wv.strength_overall
+        strength: wv.strength_overall,
+        core_subject: wv.core_subject,
+        core_mechanisms: wv.core_attributes as MechanismType[]
       })
       cat.total_perceptions += wv.total_perceptions
     } catch (e) {
@@ -235,9 +242,32 @@ export function HierarchicalWorldviewMap() {
                             <h3 className="text-lg font-semibold text-slate-900 mb-2">
                               {wv.title}
                             </h3>
-                            <p className="text-slate-700 text-sm leading-relaxed">
+                            <p className="text-slate-700 text-sm leading-relaxed mb-3">
                               {wv.description}
                             </p>
+
+                            {/* Actor (행위자) */}
+                            {wv.core_subject && (
+                              <div className="flex items-center gap-2 mb-3">
+                                <User className="h-4 w-4 text-indigo-600" />
+                                <span className="text-xs font-medium text-slate-600">행위자:</span>
+                                <span className="text-sm font-semibold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded">
+                                  {wv.core_subject}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* 핵심 메커니즘 */}
+                            {wv.core_mechanisms && wv.core_mechanisms.length > 0 && (
+                              <div className="space-y-1">
+                                <p className="text-xs font-medium text-slate-600 mb-1">사고 메커니즘:</p>
+                                <MechanismList
+                                  mechanisms={wv.core_mechanisms}
+                                  size="sm"
+                                  showTooltip={true}
+                                />
+                              </div>
+                            )}
                           </div>
 
                           {wv.priority && (

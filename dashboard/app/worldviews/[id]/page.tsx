@@ -14,10 +14,13 @@ import {
   Heart,
   AlertTriangle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Users
 } from 'lucide-react'
 import { InterpretationComparison } from '@/components/worldviews/InterpretationComparison'
 import { LogicChainVisualizer } from '@/components/worldviews/LogicChainVisualizer'
+import { MechanismMatchingExplanation } from '@/components/worldviews/MechanismMatchingExplanation'
+import { MechanismList, type MechanismType } from '@/components/worldviews/MechanismBadge'
 
 interface ExplicitClaim {
   subject: string
@@ -32,6 +35,12 @@ interface ReasoningGap {
   gap: string
 }
 
+interface Actor {
+  subject: string
+  purpose: string
+  methods: string[]
+}
+
 interface LayeredPerception {
   id: string
   content_id: string
@@ -40,6 +49,9 @@ interface LayeredPerception {
   reasoning_gaps: ReasoningGap[]
   deep_beliefs: string[]
   worldview_hints: string
+  mechanisms?: MechanismType[]
+  actor?: Actor
+  logic_chain?: string[]
   created_at: string
 }
 
@@ -208,67 +220,75 @@ export default function WorldviewDetailPage() {
           세계관 지도로 돌아가기
         </Link>
 
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-4">
-              <PriorityBadge priority={frame.priority} />
-              <p className="text-sm text-slate-600">{frame.category}</p>
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-4">
+        {/* Header - v2.0 사고 구조 중심 */}
+        <div className="bg-gradient-to-br from-white to-slate-50 rounded-xl shadow-lg border-2 border-blue-300 p-8 mb-6">
+          {/* 타이틀 */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-slate-900 mb-3">
               {worldview.title}
             </h1>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-lg text-blue-900 leading-relaxed">
+            <p className="text-lg text-slate-700 leading-relaxed">
               {worldview.description || frame.description}
             </p>
-            <div className="mt-3 pt-3 border-t border-blue-300 flex items-center gap-6 text-sm">
-              {worldview.core_subject && (
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-blue-700">핵심 대상:</span>
-                  <span className="text-blue-900">{worldview.core_subject}</span>
+          </div>
+
+          {/* v2.0 핵심: 메커니즘 + Actor */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* 핵심 메커니즘 */}
+            {worldview.core_attributes && (worldview.core_attributes as MechanismType[]).length > 0 && (
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-5 border-2 border-purple-300">
+                <h3 className="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  사고 메커니즘 (어떻게 생각하는가)
+                </h3>
+                <MechanismList mechanisms={worldview.core_attributes as MechanismType[]} size="md" showTooltip={true} />
+              </div>
+            )}
+
+            {/* 핵심 행위자 */}
+            {worldview.core_subject && (
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-5 border-2 border-indigo-300">
+                <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  핵심 행위자 (누구를 주목하는가)
+                </h3>
+                <div className="inline-block bg-white px-6 py-3 rounded-lg border-2 border-indigo-400 shadow-sm">
+                  <p className="text-2xl font-bold text-indigo-900">
+                    {worldview.core_subject}
+                  </p>
                 </div>
-              )}
-              {worldview.overall_valence && (
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-blue-700">전체 감정:</span>
-                  <span className={`px-2 py-0.5 rounded ${
-                    worldview.overall_valence === 'negative' ? 'bg-red-100 text-red-800' :
-                    worldview.overall_valence === 'positive' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {worldview.overall_valence === 'negative' ? '부정' :
-                     worldview.overall_valence === 'positive' ? '긍정' : '중립'}
-                  </span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">분석된 글</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">
-                {layeredPerceptions.length}개
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
+              <p className="text-xs text-slate-600 mb-1">분석된 담론</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {layeredPerceptions.length}
               </p>
             </div>
-            <div className="text-center p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">원본 글</p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">
-                {contents.length}개
+            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-700 mb-1">원본 글</p>
+              <p className="text-2xl font-bold text-blue-900">
+                {contents.length}
               </p>
             </div>
-            <div className="text-center p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">통합 전 worldview</p>
-              <p className="text-2xl font-bold text-purple-600 mt-1">
-                {frame.metadata?.merged_from?.length || 1}개
+            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+              <p className="text-xs text-purple-700 mb-1">버전</p>
+              <p className="text-2xl font-bold text-purple-900">
+                v{worldview.version || 1}.0
               </p>
             </div>
           </div>
         </div>
+
+        {/* 🎯 메커니즘 기반 매칭 설명 */}
+        <MechanismMatchingExplanation
+          coreSubject={worldview.core_subject}
+          coreMechanisms={worldview.core_attributes as MechanismType[]}
+        />
 
         {/* 🎯 핵심 구조: 3층 논리 연쇄 */}
         {representativePerception && representativePerception.explicit_claims && (
@@ -376,6 +396,57 @@ export default function WorldviewDetailPage() {
                       <div className="mt-4 pt-4 border-t-2 border-slate-200 space-y-4">
                         {contentPerceptions.slice(0, 1).map((lp, idx) => (
                           <div key={idx} className="space-y-4">
+                            {/* v2.0: Mechanisms & Actor */}
+                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-2 border-purple-200">
+                              <h4 className="font-bold text-purple-900 mb-3 text-sm">
+                                🧠 v2.0 사고 구조 분석
+                              </h4>
+
+                              {/* Mechanisms */}
+                              {lp.mechanisms && lp.mechanisms.length > 0 && (
+                                <div className="mb-3">
+                                  <p className="text-xs font-medium text-slate-700 mb-2">사고 메커니즘:</p>
+                                  <MechanismList mechanisms={lp.mechanisms} size="sm" showTooltip={true} />
+                                </div>
+                              )}
+
+                              {/* Actor */}
+                              {lp.actor && (
+                                <div className="bg-white rounded-lg p-3 border border-purple-200">
+                                  <p className="text-xs font-bold text-purple-900 mb-2">행위자 구조:</p>
+                                  <div className="space-y-1.5 text-xs">
+                                    <div className="flex items-start gap-2">
+                                      <span className="font-semibold text-indigo-700 min-w-[60px]">누가:</span>
+                                      <span className="text-slate-900">{lp.actor.subject}</span>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                      <span className="font-semibold text-purple-700 min-w-[60px]">왜:</span>
+                                      <span className="text-slate-900">{lp.actor.purpose}</span>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                      <span className="font-semibold text-blue-700 min-w-[60px]">어떻게:</span>
+                                      <span className="text-slate-900">{lp.actor.methods.join(', ')}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Logic Chain */}
+                              {lp.logic_chain && lp.logic_chain.length > 0 && (
+                                <div className="mt-3 bg-white rounded-lg p-3 border border-blue-200">
+                                  <p className="text-xs font-bold text-blue-900 mb-2">사고 흐름 (Logic Chain):</p>
+                                  <div className="space-y-2">
+                                    {lp.logic_chain.map((step, i) => (
+                                      <div key={i} className="flex items-start gap-2">
+                                        <span className="text-blue-600 font-bold min-w-[20px]">{i + 1}.</span>
+                                        <span className="text-xs text-slate-800">{step}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
                             {/* Layer 1: Explicit Claims */}
                             {lp.explicit_claims && lp.explicit_claims.length > 0 && (
                               <div className="bg-blue-50 rounded-lg p-4">
