@@ -189,33 +189,41 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ---
 
-## 🔄 Current State (2025-01)
+## 🔄 Current State (2025-10-12)
 
-### ⚠️ Deployment Status: PENDING
-**v2.0 System is ready but NOT YET DEPLOYED**
+### ✅ Deployment Status: LIVE
+**v2.0 System is DEPLOYED and OPERATIONAL**
 
-See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) for deployment steps.
-
-### Completed (Ready to Deploy)
-✅ 3-Layer perception extraction
-✅ 5 Mechanism extraction (v2.0)
+### Deployed Features
+✅ 3-Layer perception extraction (501 perceptions)
+✅ 5 Mechanism extraction system
 ✅ Worldview auto-discovery engine
-✅ Mechanism-based matching
+✅ Mechanism-based matching (910 links, 84.2% coverage)
 ✅ Evolution tracking system
-✅ Migration scripts ready
-✅ Documentation complete
+✅ 9 active v2.0 worldviews
+✅ Dashboard running at http://localhost:3000
 
-### Deployment Required
-🚨 Schema migration (supabase/migrations/301_*.sql)
-🚨 Data migration (scripts/migrate_to_new_system.py)
-🚨 Environment variables verification
-🚨 Dashboard testing
+### Deployment Statistics (2025-10-12)
+- **Perceptions analyzed**: 501 with reasoning structures
+- **Active worldviews**: 9 mechanism-based worldviews
+- **Perception-worldview links**: 910 connections
+- **Coverage**: 422/501 perceptions matched (84.2%)
+- **Average links**: 1.82 links per perception
+- **Old worldviews archived**: 9
+
+### Top Worldviews by Perception Count
+1. 온라인 반복 패턴 → 조직적 댓글부대 (182)
+2. 민주당/좌파 정보 파악 → 불법 사찰 (159)
+3. 정치인 상충 발언 → 의도적 기만 (140)
+4. 보수 진영 규모 → 민심 지표 (111)
+5. 중국·중국계 관찰 → 침투/범죄 (94)
 
 ### Future Enhancements
 🚧 Deconstruction logic (반박 논리 생성)
-🚧 Dashboard evolution timeline
+🚧 Dashboard evolution timeline visualization
 🚧 Real-time discourse tracking
-🚧 Automated weekly evolution cron
+🚧 Automated weekly evolution cron job
+🚧 Multi-community comparison
 
 ### Database Schema
 - v1.0: migrations 100-106 (legacy)

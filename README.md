@@ -7,10 +7,11 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 
-**🎉 v2.0 출시: 메커니즘 기반 살아있는 세계관 시스템**
-- ✅ 5개 핵심 사고 메커니즘 자동 추출
-- ✅ 실시간 세계관 진화 추적
-- ✅ GPT-5 기반 자동 분석 및 업데이트
+**🎉 v2.0 배포 완료 (2025-10-12): 메커니즘 기반 살아있는 세계관 시스템**
+- ✅ 501개 perception 분석 완료 (5개 핵심 메커니즘 추출)
+- ✅ 9개 v2.0 세계관 생성 및 운영 중
+- ✅ 910개 perception-worldview 링크 (84.2% 커버리지)
+- ✅ Dashboard 운영: http://localhost:3000
 
 ---
 
