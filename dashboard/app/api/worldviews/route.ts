@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
       .from('worldviews')
       .select('*', { count: 'exact' })
       .gte('strength_overall', minStrength)
+      .neq('archived', true)
 
     // Filter by trend
     if (trend) {
