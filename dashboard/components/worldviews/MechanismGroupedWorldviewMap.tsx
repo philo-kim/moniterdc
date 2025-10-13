@@ -138,59 +138,21 @@ export function MechanismGroupedWorldviewMap() {
   const totalWorldviews = worldviews.length
 
   return (
-    <div className="space-y-6">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-sm p-6 border-2 border-purple-300">
-          <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      {/* 간단한 통계 */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-6">
             <div>
-              <p className="text-sm text-purple-700 font-medium">사고 메커니즘</p>
-              <p className="text-3xl font-bold text-purple-900 mt-1">5개</p>
-              <p className="text-xs text-purple-600 mt-1">v2.0 핵심 패턴</p>
+              <span className="text-slate-600">세계관 </span>
+              <span className="font-bold text-slate-900">{totalWorldviews}개</span>
             </div>
-            <div className="h-12 w-12 bg-purple-200 rounded-lg flex items-center justify-center">
-              <Brain className="h-6 w-6 text-purple-700" />
+            <div>
+              <span className="text-slate-600">담론 </span>
+              <span className="font-bold text-slate-900">{totalPerceptions}개</span>
             </div>
           </div>
         </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm p-6 border-2 border-blue-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-blue-700 font-medium">발견된 세계관</p>
-              <p className="text-3xl font-bold text-blue-900 mt-1">{totalWorldviews}개</p>
-              <p className="text-xs text-blue-600 mt-1">살아있는 시스템</p>
-            </div>
-            <div className="h-12 w-12 bg-blue-200 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-blue-700" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm p-6 border-2 border-green-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-green-700 font-medium">분석된 담론</p>
-              <p className="text-3xl font-bold text-green-900 mt-1">{totalPerceptions}개</p>
-              <p className="text-xs text-green-600 mt-1">구조 추출 완료</p>
-            </div>
-            <div className="h-12 w-12 bg-green-200 rounded-lg flex items-center justify-center">
-              <Users className="h-6 w-6 text-green-700" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Box */}
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5">
-        <h3 className="text-sm font-bold text-amber-900 mb-2">💡 메커니즘 기반 분석이란?</h3>
-        <p className="text-sm text-amber-800 leading-relaxed mb-2">
-          v2.0은 <strong>&ldquo;무엇에 대한 이야기&rdquo;</strong>가 아니라 <strong>&ldquo;어떻게 생각하는가&rdquo;</strong>로 세계관을 분류합니다.
-          이민, 범죄, 사법 등 주제가 달라도 같은 사고 패턴을 쓰면 같은 세계관입니다.
-        </p>
-        <p className="text-xs text-amber-700 italic">
-          예: &ldquo;증거 없이 즉시 단정 + 과거 투사&rdquo;는 어떤 주제에서든 반복됩니다.
-        </p>
       </div>
 
       {/* Mechanism Groups */}
@@ -266,17 +228,15 @@ export function MechanismGroupedWorldviewMap() {
                             {wv.core_subject && (
                               <div className="flex items-center gap-2 mb-3">
                                 <Users className="h-4 w-4 text-indigo-600" />
-                                <span className="text-xs font-medium text-slate-600">핵심 행위자:</span>
-                                <span className="text-sm font-bold text-indigo-900 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
+                                <span className="text-sm font-bold text-indigo-900">
                                   {wv.core_subject}
                                 </span>
                               </div>
                             )}
 
-                            {/* All Mechanisms */}
-                            {wv.core_attributes && wv.core_attributes.length > 0 && (
+                            {/* All Mechanisms - 2개 이상일 때만 표시 */}
+                            {wv.core_attributes && wv.core_attributes.length > 1 && (
                               <div className="mb-3">
-                                <p className="text-xs font-medium text-slate-600 mb-2">사용하는 메커니즘:</p>
                                 <MechanismList mechanisms={wv.core_attributes} size="sm" showTooltip={true} />
                               </div>
                             )}
@@ -292,9 +252,9 @@ export function MechanismGroupedWorldviewMap() {
 
                             <Link
                               href={`/worldviews/${wv.id}`}
-                              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all text-sm font-bold shadow-md hover:shadow-lg"
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                             >
-                              사고 구조 분석 →
+                              상세보기
                             </Link>
                           </div>
                         </div>

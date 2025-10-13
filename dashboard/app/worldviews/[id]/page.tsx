@@ -284,12 +284,6 @@ export default function WorldviewDetailPage() {
           </div>
         </div>
 
-        {/* 🎯 메커니즘 기반 매칭 설명 */}
-        <MechanismMatchingExplanation
-          coreSubject={worldview.core_subject}
-          coreMechanisms={worldview.core_attributes as MechanismType[]}
-        />
-
         {/* 🎯 핵심 구조: 3층 논리 연쇄 */}
         {representativePerception && representativePerception.explicit_claims && (
           <LogicChainVisualizer
