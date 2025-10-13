@@ -1,6 +1,6 @@
 'use client'
 
-import { MechanismGroupedWorldviewMap } from '@/components/worldviews/MechanismGroupedWorldviewMap'
+import { ActorCentricWorldviewMap } from '@/components/worldviews/ActorCentricWorldviewMap'
 
 export default function HomePage() {
   return (
@@ -21,7 +21,7 @@ export default function HomePage() {
         </header>
 
         {/* Main Content */}
-        <MechanismGroupedWorldviewMap />
+        <ActorCentricWorldviewMap />
       </div>
     </div>
   )
