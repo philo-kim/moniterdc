@@ -58,15 +58,37 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Add metadata
-    const worldviews = data?.map(w => ({
-      ...w,
-      // Calculate additional metrics
-      perception_density: w.total_perceptions / Math.max(w.total_contents, 1),
-      mechanism_count: (w.cognitive_mechanisms?.length || 0) +
-                      (w.formation_phases?.length || 0) +
-                      (w.structural_flaws?.length || 0)
-    }))
+    // Parse frame field and add metadata
+    const worldviews = data?.map(w => {
+      let frameData: any = {}
+      try {
+        if (w.frame) {
+          frameData = typeof w.frame === 'string' ? JSON.parse(w.frame) : w.frame
+        }
+      } catch (e) {
+        console.error('Failed to parse frame:', e)
+      }
+
+      return {
+        ...w,
+        // Parse frame data into individual fields
+        mechanisms: frameData.core_mechanisms || w.mechanisms || [],
+        actor: frameData.actor || w.core_subject,
+        logic_chain: frameData.logic_pattern || null,
+        reasoning_structure: frameData.logic_pattern || null,
+        actor_structure: frameData.actor ? {
+          subject: frameData.actor,
+          purpose: frameData.logic_pattern?.conclusion || null,
+          methods: frameData.examples || []
+        } : null,
+        // Calculate additional metrics
+        perception_density: w.total_perceptions / Math.max(w.total_contents, 1),
+        mechanism_count: (frameData.core_mechanisms?.length || 0) +
+                        (w.cognitive_mechanisms?.length || 0) +
+                        (w.formation_phases?.length || 0) +
+                        (w.structural_flaws?.length || 0)
+      }
+    })
 
     return NextResponse.json({
       worldviews,

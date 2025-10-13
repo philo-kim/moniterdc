@@ -81,9 +81,29 @@ export async function GET(
       .order('recorded_at', { ascending: true })
       .limit(30)
 
+    // Parse frame field
+    let frameData: any = {}
+    try {
+      if (worldview.frame) {
+        frameData = typeof worldview.frame === 'string' ? JSON.parse(worldview.frame) : worldview.frame
+      }
+    } catch (e) {
+      console.error('Failed to parse frame:', e)
+    }
+
     // Build complete response
     return NextResponse.json({
       ...worldview,
+      // Parse frame data into individual fields
+      mechanisms: frameData.core_mechanisms || worldview.mechanisms || [],
+      actor: frameData.actor || worldview.core_subject,
+      logic_chain: frameData.logic_pattern || null,
+      reasoning_structure: frameData.logic_pattern || null,
+      actor_structure: frameData.actor ? {
+        subject: frameData.actor,
+        purpose: frameData.logic_pattern?.conclusion || null,
+        methods: frameData.examples || []
+      } : null,
       layered_perceptions: layeredPerceptions,
       contents,
       strength_history: strengthHistory || [],
