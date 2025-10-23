@@ -17,7 +17,9 @@ interface Worldview {
   title: string
   description: string
   core_subject?: string
+  actor_subject?: string  // New Claude format
   core_attributes?: MechanismType[]
+  mechanisms?: MechanismType[]  // New Claude format
   total_perceptions: number
 }
 
@@ -38,7 +40,7 @@ export function ActorCentricWorldviewMap() {
     async function loadData() {
       try {
         setIsLoading(true)
-        const res = await fetch('/api/worldviews?limit=100')
+        const res = await fetch('/api/worldviews?limit=100&sort_by=total_perceptions')
         if (!res.ok) {
           throw new Error('Failed to fetch worldviews')
         }
@@ -71,32 +73,41 @@ export function ActorCentricWorldviewMap() {
     )
   }
 
-  const worldviews: Worldview[] = (data?.worldviews || []).map((wv: any) => ({
-    id: wv.id,
-    title: wv.title,
-    description: wv.description,
-    core_subject: wv.core_subject,
-    core_attributes: wv.core_attributes as MechanismType[],
-    total_perceptions: wv.total_perceptions || 0
-  })).filter((wv: Worldview) => wv.core_subject && wv.core_attributes && wv.core_attributes.length > 0)
+  const worldviews: Worldview[] = (data?.worldviews || []).map((wv: any) => {
+    // Support both old and new data formats
+    const actorSubject = wv.actor_subject || wv.core_subject
+    const mechanisms = (wv.mechanisms || wv.core_attributes || []) as MechanismType[]
+
+    return {
+      id: wv.id,
+      title: wv.title,
+      description: wv.description,
+      core_subject: actorSubject,
+      actor_subject: actorSubject,
+      core_attributes: mechanisms,
+      mechanisms: mechanisms,
+      total_perceptions: wv.total_perceptions || 0
+    }
+  }).filter((wv: Worldview) => wv.core_subject && wv.core_attributes && wv.core_attributes.length > 0)
 
   // Actor별로 그룹화
   const actorGroups: ActorGroup[] = []
   const actorMap = new Map<string, ActorGroup>()
 
   worldviews.forEach(wv => {
-    if (!wv.core_subject) return
+    const actorKey = wv.actor_subject || wv.core_subject
+    if (!actorKey) return
 
-    if (!actorMap.has(wv.core_subject)) {
-      actorMap.set(wv.core_subject, {
-        actor: wv.core_subject,
+    if (!actorMap.has(actorKey)) {
+      actorMap.set(actorKey, {
+        actor: actorKey,
         worldviews: [],
         total_perceptions: 0,
         all_mechanisms: []
       })
     }
 
-    const group = actorMap.get(wv.core_subject)!
+    const group = actorMap.get(actorKey)!
     group.worldviews.push(wv)
     group.total_perceptions += wv.total_perceptions
 

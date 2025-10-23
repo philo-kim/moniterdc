@@ -73,14 +73,6 @@ export async function GET(
       contents = contentData || []
     }
 
-    // Get strength history
-    const { data: strengthHistory } = await supabase
-      .from('worldview_strength_history')
-      .select('*')
-      .eq('worldview_id', id)
-      .order('recorded_at', { ascending: true })
-      .limit(30)
-
     // Parse frame field
     let frameData: any = {}
     try {
@@ -91,22 +83,27 @@ export async function GET(
       console.error('Failed to parse frame:', e)
     }
 
+    // Extract actor subject from frame.actor (can be object or string)
+    let actorSubject = worldview.core_subject
+    if (frameData.actor) {
+      if (typeof frameData.actor === 'object' && frameData.actor.subject) {
+        actorSubject = frameData.actor.subject
+      } else if (typeof frameData.actor === 'string') {
+        actorSubject = frameData.actor
+      }
+    }
+
     // Build complete response
     return NextResponse.json({
       ...worldview,
       // Parse frame data into individual fields
-      mechanisms: frameData.core_mechanisms || worldview.mechanisms || [],
-      actor: frameData.actor || worldview.core_subject,
+      mechanisms: frameData.core_mechanisms || worldview.core_attributes || [],
+      actor: frameData.actor || null,
+      actor_subject: actorSubject,
       logic_chain: frameData.logic_pattern || null,
       reasoning_structure: frameData.logic_pattern || null,
-      actor_structure: frameData.actor ? {
-        subject: frameData.actor,
-        purpose: frameData.logic_pattern?.conclusion || null,
-        methods: frameData.examples || []
-      } : null,
       layered_perceptions: layeredPerceptions,
       contents,
-      strength_history: strengthHistory || [],
       stats: {
         total_perceptions: layeredPerceptions.length,
         total_contents: contents.length,

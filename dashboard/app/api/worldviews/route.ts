@@ -26,22 +26,14 @@ export async function GET(request: NextRequest) {
     // Query parameters
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
-    const sortBy = searchParams.get('sort_by') || 'strength_overall'
+    const sortBy = searchParams.get('sort_by') || 'updated_at'
     const order = searchParams.get('order') || 'desc'
-    const trend = searchParams.get('trend') // rising, stable, falling, dead
-    const minStrength = parseFloat(searchParams.get('min_strength') || '0')
 
     // Build query
     let query = supabase
       .from('worldviews')
       .select('*', { count: 'exact' })
-      .gte('strength_overall', minStrength)
       .neq('archived', true)
-
-    // Filter by trend
-    if (trend) {
-      query = query.eq('trend', trend)
-    }
 
     // Sort
     query = query.order(sortBy, { ascending: order === 'asc' })
@@ -70,24 +62,26 @@ export async function GET(request: NextRequest) {
         console.error('Failed to parse frame:', e)
       }
 
+      // Extract actor subject from frame.actor (can be object or string)
+      let actorSubject = w.core_subject
+      if (frameData.actor) {
+        if (typeof frameData.actor === 'object' && frameData.actor.subject) {
+          actorSubject = frameData.actor.subject
+        } else if (typeof frameData.actor === 'string') {
+          actorSubject = frameData.actor
+        }
+      }
+
       return {
         ...w,
         // Parse frame data into individual fields
-        mechanisms: frameData.core_mechanisms || w.mechanisms || [],
-        actor: frameData.actor || w.core_subject,
+        mechanisms: frameData.core_mechanisms || w.core_attributes || [],
+        actor: frameData.actor || null,
+        actor_subject: actorSubject,
         logic_chain: frameData.logic_pattern || null,
         reasoning_structure: frameData.logic_pattern || null,
-        actor_structure: frameData.actor ? {
-          subject: frameData.actor,
-          purpose: frameData.logic_pattern?.conclusion || null,
-          methods: frameData.examples || []
-        } : null,
         // Calculate additional metrics
-        perception_density: w.total_perceptions / Math.max(w.total_contents, 1),
-        mechanism_count: (frameData.core_mechanisms?.length || 0) +
-                        (w.cognitive_mechanisms?.length || 0) +
-                        (w.formation_phases?.length || 0) +
-                        (w.structural_flaws?.length || 0)
+        perception_density: w.total_perceptions / Math.max(w.total_contents || 1, 1)
       }
     })
 
