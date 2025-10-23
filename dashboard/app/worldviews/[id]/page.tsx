@@ -312,7 +312,7 @@ export default function WorldviewDetailPage() {
               )}
 
               {/* Skipped Verification */}
-              {worldview.logic_chain.skipped_verification && worldview.logic_chain.skipped_verification.length > 0 && (
+              {worldview.logic_chain.skipped_verification && (
                 <>
                   <div className="flex justify-center">
                     <div className="text-amber-600 text-2xl font-bold">↓</div>
@@ -327,14 +327,19 @@ export default function WorldviewDetailPage() {
                         <p className="text-xs text-amber-800 mb-3 italic">
                           이런 가능성들은 고려하지 않고 바로 결론으로 넘어갑니다
                         </p>
-                        <ul className="space-y-2">
-                          {worldview.logic_chain.skipped_verification.map((skip: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-amber-600 mt-1">▸</span>
-                              <span className="text-slate-800 text-sm">{skip}</span>
-                            </li>
-                          ))}
-                        </ul>
+                        {/* Handle both string and array formats */}
+                        {Array.isArray(worldview.logic_chain.skipped_verification) ? (
+                          <ul className="space-y-2">
+                            {worldview.logic_chain.skipped_verification.map((skip: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-amber-600 mt-1">▸</span>
+                                <span className="text-slate-800 text-sm">{skip}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-slate-800">{worldview.logic_chain.skipped_verification}</p>
+                        )}
                       </div>
                     </div>
                   </div>
