@@ -5,22 +5,111 @@ LayeredPerceptionExtractor - 3층 구조 분석
 1. 표면층 (Explicit): 명시적 주장
 2. 암묵층 (Implicit): 전제하는 사고
 3. 심층 (Deep): 무의식적 믿음
+
+v2.1: Fast filter 통합
+- explicit_claims 추출 후 품질 필터링
+- 필터링된 좋은 claims만으로 implicit/deep 재추출
 """
 
-from openai import AsyncOpenAI
+from anthropic import Anthropic
 import os
 import json
-from typing import Dict, List
+import asyncio
+from typing import Dict, List, Tuple
 from uuid import UUID
 from engines.utils.supabase_client import get_supabase
 
-client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 class LayeredPerceptionExtractor:
-    """Extract 3-layer perception from content"""
+    """Extract 3-layer perception from content with quality filtering"""
 
     def __init__(self):
         self.supabase = get_supabase()
+
+    def _fast_filter_claim(self, claim_text: str) -> Tuple[bool, str]:
+        """
+        Filter low-quality explicit claims
+
+        Same logic as PatternManager._fast_filter_surface()
+
+        Returns:
+            (should_keep, reason_if_filtered)
+        """
+        # Handle both string and dict formats
+        if isinstance(claim_text, dict):
+            # Extract predicate or combine subject + predicate
+            text = claim_text.get('predicate', '')
+            if not text and 'subject' in claim_text:
+                text = f"{claim_text.get('subject', '')} {claim_text.get('predicate', '')}"
+        else:
+            text = claim_text
+
+        text_clean = str(text).strip()
+
+        # 1. 길이 체크
+        if len(text_clean) < 10:
+            return (False, "길이 < 10")
+
+        # 2. 지시대명사로 시작
+        pronouns_start = [
+            '이는 ', '이는,', '이것은 ', '이것이 ', '그것은 ', '그것이 ',
+            '여기는 ', '거기는 ', '저기는 '
+        ]
+        for p in pronouns_start:
+            if text_clean.startswith(p):
+                return (False, "지시대명사 시작")
+
+        if text_clean.startswith('이 ') or text_clean.startswith('그 ') or text_clean.startswith('저 '):
+            if not any(text_clean.startswith(p) for p in ['이 사건', '이 사람', '이 일', '그 사건', '그 사람']):
+                return (False, "지시대명사 시작")
+
+        # 3. 막연한 주어
+        vague_subjects = [
+            '우리가 ', '우리는 ', '이들은 ', '이들이 ', '그들은 ', '그들이 ',
+            '엄마들이 ', '좌파들이 ', '보수들이 ', '사람들이 '
+        ]
+        for s in vague_subjects:
+            if text_clean.startswith(s):
+                return (False, "막연한 주어")
+
+        # 4. 당위문
+        normative = ['해야 한다', '해야한다', '하자', '드리자', '말아야', '되어야']
+        for n in normative:
+            if n in text_clean:
+                return (False, "당위문")
+
+        # 5. 막연한 평가
+        vague_eval = ['웃기다', '다행', '부당', '적절', '나쁜', '좋은',
+                      '이상하다', '복잡하다', '어렵다', '쉽다']
+
+        concrete_subjects = ['민주당', '국민의힘', '윤석열', '이재명',
+                            '경찰', '검찰', '법원', '정부', '국회',
+                            '대통령', '의원', '장관', '판사', '검사']
+
+        has_concrete_subject = any(subj in text_clean for subj in concrete_subjects)
+
+        if not has_concrete_subject:
+            for v in vague_eval:
+                if v in text_clean:
+                    return (False, "막연한 평가")
+
+        # 6. 불완전한 문장
+        endings = ['다.', '다,', '다"', '다\'', '다!', '다?',
+                   '까.', '까,', '까?', '냐.', '냐,', '냐?',
+                   '요.', '요,', '요!', '음.', '음,']
+
+        has_ending = any(text_clean.endswith(end) for end in endings)
+
+        if not has_ending and not text_clean.endswith('다'):
+            return (False, "불완전한 문장")
+
+        # 7. 자음 이니셜
+        korean_consonants = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'
+        if any(c in korean_consonants for c in text_clean[:3]):
+            return (False, "자음 이니셜")
+
+        return (True, "")
 
     async def extract(self, content: Dict) -> UUID:
         """
@@ -41,41 +130,14 @@ class LayeredPerceptionExtractor:
 
 이 글을 **3개 층위**로 분석해주세요.
 
-⚠️ 중요: 일반론이 아닌, **이 글쓴이가 실제로 믿는 구체적인 내용**을 추출하세요.
-
 ## 1. 표면층 (Explicit Layer) - 명시적 주장
-**글에서 직접 말하고 있는 것**
-- 누가/무엇을 비난하는가?
-- 어떤 행동/사건을 문제 삼는가?
-- 구체적인 인물/조직/사건 이름 포함
+글에서 직접 말하고 있는 것
 
 ## 2. 암묵층 (Implicit Layer) - 전제하는 사고
-**말하지 않았지만 당연하게 여기는 것**
-
-❌ 나쁜 예: "비공개 정보를 안다 = 불법"
-✅ 좋은 예: "민주당은 통신사를 협박해서 개인정보를 얻는다"
-
-❌ 나쁜 예: "사찰은 나쁘다"
-✅ 좋은 예: "이들은 맘에 안드는 판사까지 사찰한다 (사법부 장악 시도)"
-
-**구체적으로:**
-- 누가 어떤 방법으로 무엇을 한다고 믿는가?
-- 그들의 의도/목적은 무엇이라고 생각하는가?
-- 어떤 패턴/전략이 있다고 보는가?
+말하지 않았지만 당연하게 여기는 것
 
 ## 3. 심층 (Deep Layer) - 무의식적 믿음
-**이 글쓴이 진영만의 세계관**
-
-❌ 나쁜 예: "권력은 부패한다" (누구나 하는 말)
-✅ 좋은 예: "민주당/좌파는 과거 독재정권처럼 사찰과 탄압으로 권력을 유지하려 한다"
-
-❌ 나쁜 예: "작은 문제가 커진다"
-✅ 좋은 예: "지금의 작은 사찰이 과거 독재시대처럼 전면적 감시국가로 발전한다"
-
-**구체적으로:**
-- 이 진영이 **역사를 어떻게 보는가**? (과거 사례 → 현재 연결)
-- **상대편의 본질**을 어떻게 규정하는가? (민주당/좌파/중국 = ?)
-- **세상의 작동 원리**를 어떻게 이해하는가? (A가 일어나면 반드시 B가 일어난다)
+이 글쓴이 진영만의 세계관
 
 JSON 형식:
 {{
@@ -83,13 +145,12 @@ JSON 형식:
     {{
       "subject": "민주당",
       "predicate": "유심교체 정보를 불법으로 얻었다",
-      "evidence_cited": "나경원 의원 SNS - 어떻게 알았나",
+      "evidence_cited": "나경원 의원 SNS",
       "quote": "유심교체를 어떻게 알아"
     }}
   ],
   "implicit_assumptions": [
-    "민주당은 통신사를 협박해서 개인 사찰용 정보를 얻는다",
-    "맘에 안드는 판사를 제거하기 위해 사찰한다 (사법부 장악 시도)"
+    "민주당은 통신사를 협박해서 개인 사찰용 정보를 얻는다"
   ],
   "reasoning_gaps": [
     {{
@@ -99,25 +160,42 @@ JSON 형식:
     }}
   ],
   "deep_beliefs": [
-    "민주당/좌파는 과거 독재정권처럼 사찰로 반대파를 제거한다",
-    "지금의 작은 사찰이 곧 전면적 감시독재 사회로 발전한다 (역사 반복)",
-    "이들은 사법부까지 장악해서 완전한 권력을 차지하려 한다"
+    "민주당/좌파는 과거 독재정권처럼 사찰로 반대파를 제거한다"
   ],
-  "worldview_hints": "과거 독재 → 현재 재현, 좌파 = 독재 본성, 사법부 장악 시도"
+  "worldview_hints": "과거 독재 → 현재 재현"
 }}
 """
 
-        # GPT-5 only (no fallback as requested)
-        response = await client.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {"role": "system", "content": "You are an expert in discourse analysis. Always respond in valid JSON format."},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"}
+        # Claude Sonnet 4.5 (Baseline 프롬프트 - "Less is More")
+        # Run in thread pool to make it async
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=4096,
+                temperature=0,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
         )
 
-        result = json.loads(response.choices[0].message.content)
+        response_text = response.content[0].text
+
+        # Parse JSON from response
+        if "```json" in response_text:
+            json_start = response_text.find("```json") + 7
+            json_end = response_text.find("```", json_start)
+            json_str = response_text[json_start:json_end].strip()
+        elif "{" in response_text:
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
+            json_str = response_text[json_start:json_end]
+        else:
+            json_str = response_text
+
+        result = json.loads(json_str)
 
         # Save to DB
         perception_id = await self._save_perception(content['id'], result)

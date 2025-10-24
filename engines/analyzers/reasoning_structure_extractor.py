@@ -10,14 +10,15 @@ Content → Reasoning Structure 변환
 5. 표면_부정: 표면 X / 실제 Y
 """
 
-from openai import AsyncOpenAI
+from anthropic import Anthropic
 import os
 import json
+import asyncio
 from typing import Dict, List
 from uuid import UUID
 from engines.utils.supabase_client import get_supabase
 
-client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 
 class ReasoningStructureExtractor:
@@ -38,91 +39,109 @@ class ReasoningStructureExtractor:
         """
 
         prompt = f"""
-다음은 DC Gallery 정치 글의 추론 구조 분석 결과입니다:
+다음 담론을 단계별로 분석하세요:
 
 제목: {content['title']}
 내용: {content['body'][:2000]}
 
----
+## Step 1: 추론 흐름 파악
 
-이 글의 **추론 구조**를 분석해주세요:
+이 글의 논리 전개를 추적하세요:
+- 어떤 관찰에서 시작?
+- 어떤 결론에 도달?
+- 중간에 생략된 검증은?
 
-1. **추론 메커니즘** (해당되는 것 모두):
-   - 즉시_단정: 관찰 → (중간 과정 생략) → 결론
-   - 필연적_인과: X → 반드시/곧/필연적으로 → Y
-   - 표면_부정: 표면은 X / 실제는 Y
-   - 역사_투사: 과거 패턴 → 현재 반복
-   - 네트워크_추론: 연결 → 조직적 공모
+## Step 2: 검증 생략 확인 (즉시_단정)
 
-2. **생략된 추론 단계** (무엇을 검증하지 않았나?):
-   - 예: 정보 출처 탐색, 합법 가능성, 직접 증거 등
+□ 즉시_단정: A를 관찰 → 검증 없이 B로 단정했나요?
+- 예: "정보를 알고있다" → "불법으로 얻었다" (정상적 취득 가능성 배제)
 
-3. **행위자 규정**:
-   - 주체: 누가 행동하는가?
-   - 목적: 왜 그렇게 한다고 보는가?
-   - 방법: 어떤 수단을 쓴다고 보는가?
+## Step 3: 과거 연결 확인 (역사_투사)
 
-4. **논리 체인** (관찰 → ... → 결론):
-   - Step 1: 구체적 관찰
-   - Step 2, 3, ...: 중간 추론 (있다면)
-   - Final: 최종 결론
+□ 역사_투사: 과거 사례를 현재에 투사했나요?
+- 예: "과거 독재정권의 사찰" → "지금도 똑같이 한다"
 
-5. **일관성 패턴** (이 글의 핵심 논리를 한 줄로):
-   - 예: "정보_파악_불법_해석", "관찰_즉시_단정"
+## Step 4: 필연성 확인 (필연적_인과)
 
-JSON 형식으로 출력:
+□ 필연적_인과: X가 일어나면 필연적으로 Y가 일어난다고 믿나요?
+- 예: "작은 사찰" → "반드시 전면적 독재로 발전"
+
+## Step 5: 네트워크 확인 (네트워크_추론)
+
+□ 네트워크_추론: 개별 사건들을 조직적 음모로 연결했나요?
+- 예: "여러 사건들" → "계획된 조직적 행동"
+
+## Step 6: 표면/실제 대비 (표면_부정)
+
+□ 표면_부정: 표면적 명분과 실제 의도를 대비시켰나요?
+- 예: "표면: 자유민주주의 수호 / 실제: 권력 유지"
+
+## Step 7: Actor 추출
+
+이 담론이 다루는 주요 행위자:
+- Subject: 누구?
+- Purpose: 왜 행동?
+- Methods: 어떤 수단?
+
+JSON 형식:
 {{
-  "mechanisms": ["즉시_단정", ...],
-  "skipped_steps": ["출처 탐색 안 함", ...],
+  "mechanisms": ["즉시_단정", "필연적_인과"],
   "actor": {{
     "subject": "민주당/좌파",
     "purpose": "권력 유지",
     "methods": ["사찰", "협박"]
   }},
   "logic_chain": [
-    "정보 파악",
-    "불법으로 단정",
-    "독재 시도"
+    "민주당이 정보를 파악했다",
+    "합법 취득 가능성을 배제했다",
+    "불법 사찰로 단정했다",
+    "독재 시도로 해석했다"
   ],
-  "consistency_pattern": "정보_파악_불법_해석",
-
   "explicit_claims": [
-    {{
-      "subject": "민주당",
-      "predicate": "유심교체 정보를 불법으로 얻었다",
-      "evidence_cited": "나경원 의원 SNS",
-      "quote": "유심교체를 어떻게 알아"
-    }}
+    "이번에 민주당이 통신사를 협박해 개인정보를 불법 취득했다",
+    "민주당이 맘에 안드는 판사를 표적 사찰한다"
   ],
   "implicit_assumptions": [
-    "민주당은 통신사를 협박해서 개인 사찰용 정보를 얻는다"
-  ],
-  "reasoning_gaps": [
-    {{
-      "from": "유심교체 정보를 알았다",
-      "to": "통신사 협박으로 얻었다",
-      "gap": "정상적 방법 가능성은 배제하고 즉시 불법으로 단정"
-    }}
+    "민주당은 항상 통신사를 협박해 반대파 정보를 얻는다",
+    "사법부 인사까지 사찰 대상으로 삼는다"
   ],
   "deep_beliefs": [
-    "민주당/좌파는 과거 독재정권처럼 사찰로 반대파를 제거한다"
-  ],
-  "worldview_hints": "과거 독재 → 현재 재현, 좌파 = 독재 본성"
+    "좌파는 과거 독재정권처럼 사찰로 권력을 유지한다",
+    "지금의 작은 사찰이 전면적 감시독재 사회로 발전한다"
+  ]
 }}
 """
 
         try:
-            response = await client.chat.completions.create(
-                model="gpt-4o",  # Use gpt-4o for speed (gpt-5 too slow)
-                messages=[
-                    {"role": "system", "content": "You are an expert in analyzing reasoning structures in political discourse. Always respond in valid JSON."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.3
+            # Claude Sonnet 4.5 (StepByStep 프롬프트 - 100% 메커니즘 탐지)
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=4096,
+                    temperature=0,
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ]
+                )
             )
 
-            result = json.loads(response.choices[0].message.content)
+            response_text = response.content[0].text
+
+            # Parse JSON from response
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
+                json_str = response_text[json_start:json_end].strip()
+            elif "{" in response_text:
+                json_start = response_text.find("{")
+                json_end = response_text.rfind("}") + 1
+                json_str = response_text[json_start:json_end]
+            else:
+                json_str = response_text
+
+            result = json.loads(json_str)
 
             # Save to DB
             perception_id = await self._save_perception(content['id'], result)
@@ -152,11 +171,13 @@ JSON 형식으로 출력:
             'logic_chain': data.get('logic_chain', []),
             'consistency_pattern': data.get('consistency_pattern', ''),
 
-            # Keep legacy fields for compatibility
+            # 3-layer structure (simplified to string arrays for V5+)
             'explicit_claims': data.get('explicit_claims', []),
             'implicit_assumptions': data.get('implicit_assumptions', []),
-            'reasoning_gaps': data.get('reasoning_gaps', []),
             'deep_beliefs': data.get('deep_beliefs', []),
+
+            # Legacy fields (keep for backward compatibility but not used in V5+)
+            'reasoning_gaps': data.get('reasoning_gaps', []),
             'worldview_hints': data.get('worldview_hints', '')
         }
 

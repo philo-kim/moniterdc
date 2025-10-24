@@ -15,11 +15,18 @@ from supabase import create_client
 from openai import AsyncOpenAI
 from collections import Counter
 from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Setup
-SUPABASE_URL = "https://ycmcsdbxnpmthekzyppl.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljbWNzZGJ4bnBtdGhla3p5cHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4MzA5NzUsImV4cCI6MjA3MzQwNjk3NX0.FNN_2LdvfbIa__swyIKgzwSDVjIqaeUQisUfsuee-48"
-OPENAI_API_KEY = "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"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+if not all([SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY]):
+    raise ValueError("Missing required environment variables. Please check your .env file.")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)

@@ -21,6 +21,7 @@ import { InterpretationComparison } from '@/components/worldviews/Interpretation
 import { LogicChainVisualizer } from '@/components/worldviews/LogicChainVisualizer'
 import { MechanismMatchingExplanation } from '@/components/worldviews/MechanismMatchingExplanation'
 import { MechanismList, type MechanismType } from '@/components/worldviews/MechanismBadge'
+import WorldviewPatterns from '@/components/worldviews/WorldviewPatterns'
 
 interface ExplicitClaim {
   subject: string
@@ -123,6 +124,7 @@ export default function WorldviewDetailPage() {
   const id = params.id as string
 
   const [worldview, setWorldview] = useState<any>(null)
+  const [patterns, setPatterns] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [showAllContents, setShowAllContents] = useState(false)
@@ -132,12 +134,27 @@ export default function WorldviewDetailPage() {
     async function loadData() {
       try {
         setIsLoading(true)
+
+        // Fetch worldview data
         const res = await fetch(`/api/worldviews/${id}`)
         if (!res.ok) {
           throw new Error('Failed to fetch worldview')
         }
         const data = await res.json()
         setWorldview(data)
+
+        // Fetch patterns data
+        try {
+          const patternsRes = await fetch(`/api/worldviews/${id}/patterns`)
+          if (patternsRes.ok) {
+            const patternsData = await patternsRes.json()
+            setPatterns(patternsData)
+          }
+        } catch (err) {
+          console.error('Failed to fetch patterns:', err)
+          // Don't fail the whole page if patterns fail
+        }
+
         setError(null)
       } catch (err) {
         setError(err as Error)
@@ -338,6 +355,13 @@ export default function WorldviewDetailPage() {
             </p>
           </div>
         </div>
+
+        {/* 🎯 동적 패턴 시스템 - 레이어별 핵심 패턴 */}
+        {patterns && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+            <WorldviewPatterns worldviewId={id} patterns={patterns} />
+          </div>
+        )}
 
         {/* 🔍 해석 차이 비교 */}
         {frame.narrative?.examples && frame.narrative.examples.length > 0 && (

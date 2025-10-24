@@ -164,7 +164,9 @@ class MechanismMatcher:
         """
         Calculate match score between perception and worldview
 
-        Score = 0.5 * actor_match + 0.3 * mechanism_match + 0.2 * logic_match
+        Claude 실험 결과: Mechanism 중심 가중치 추천
+        - 일반: Actor 50%, Mechanism 30%, Logic 20%
+        - 극단적 사건: Actor 30%, Mechanism 50%, Logic 20% (Mechanism 중심)
 
         Returns:
             Score between 0 and 1
@@ -177,17 +179,24 @@ class MechanismMatcher:
             # Old format worldview
             return 0.0
 
-        # 1. Actor matching (50%)
+        # 1. Actor matching
         actor_score = self._match_actor(perception, frame)
 
-        # 2. Mechanism matching (30%)
+        # 2. Mechanism matching
         mechanism_score = self._match_mechanisms(perception, frame)
 
-        # 3. Logic pattern matching (20%)
+        # 3. Logic pattern matching
         logic_score = self._match_logic_pattern(perception, frame)
 
-        # Combined score
-        total_score = 0.5 * actor_score + 0.3 * mechanism_score + 0.2 * logic_score
+        # Adaptive weighting (Claude 실험 기반)
+        # 메커니즘이 많을수록 Mechanism 중심 가중치 사용
+        num_mechanisms = len(perception.get('mechanisms', []))
+        if num_mechanisms >= 4:
+            # 극단적 사건 (많은 메커니즘) → Mechanism 중심
+            total_score = 0.3 * actor_score + 0.5 * mechanism_score + 0.2 * logic_score
+        else:
+            # 일반적 경우 → Actor 중심
+            total_score = 0.5 * actor_score + 0.3 * mechanism_score + 0.2 * logic_score
 
         return total_score
 
@@ -200,15 +209,21 @@ class MechanismMatcher:
         """
 
         perception_actor = perception.get('actor', {}).get('subject', '')
-        worldview_actor = frame.get('actor', '')
+
+        # Handle both dict and string format for worldview actor
+        worldview_actor_data = frame.get('actor', '')
+        if isinstance(worldview_actor_data, dict):
+            worldview_actor = worldview_actor_data.get('subject', '')
+        else:
+            worldview_actor = worldview_actor_data
 
         if not perception_actor or not worldview_actor:
             return 0.0
 
         # Extract keywords from worldview actor
-        # e.g., "중국/중국계(조선족·기업·국가기관)" → ["중국", "조선족", "기업", "국가기관"]
+        # e.g., "중국/좌파 세력" → ["중국", "좌파", "세력"]
         actor_keywords = []
-        for part in worldview_actor.replace('/', ' ').replace('(', ' ').replace(')', ' ').replace('·', ' ').split():
+        for part in worldview_actor.replace('/', ' ').replace('(', ' ').replace(')', ' ').replace('·', ' ').replace(',', ' ').split():
             if part.strip():
                 actor_keywords.append(part.strip())
 

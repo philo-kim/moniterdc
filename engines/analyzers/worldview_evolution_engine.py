@@ -10,14 +10,15 @@ WorldviewEvolutionEngine - 살아있는 세계관 시스템
 실시간으로 담론 변화를 추적하는 살아있는 시스템
 """
 
-from openai import AsyncOpenAI
+from anthropic import Anthropic
 import os
 import json
+import asyncio
 from typing import Dict, List, Tuple
 from datetime import datetime
 from engines.utils.supabase_client import get_supabase
 
-client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 
 class WorldviewEvolutionEngine:
@@ -99,78 +100,152 @@ class WorldviewEvolutionEngine:
             List of worldview dicts
         """
 
-        # Prepare summary data
-        summary_data = []
-        for p in perceptions[:200]:  # Limit for GPT token constraints
-            summary_data.append({
+        # Prepare statistics
+        mechanism_counts = {}
+        actor_counts = {}
+        logic_chain_samples = []
+
+        for p in perceptions[:200]:
+            # Mechanisms
+            for mech in p.get('mechanisms', []):
+                mechanism_counts[mech] = mechanism_counts.get(mech, 0) + 1
+
+            # Actors
+            actor = p.get('actor', {})
+            if isinstance(actor, dict):
+                subj = actor.get('subject', 'Unknown')
+                if isinstance(subj, list):
+                    subj = ', '.join(str(s) for s in subj)
+                elif not isinstance(subj, str):
+                    subj = str(subj)
+                actor_counts[subj] = actor_counts.get(subj, 0) + 1
+
+            # Logic chain samples
+            logic = p.get('logic_chain', [])
+            if logic and len(logic) > 0:
+                logic_chain_samples.append(logic[0])
+
+        # Top stats
+        top_mechs = sorted(mechanism_counts.items(), key=lambda x: x[1], reverse=True)
+        top_actors = sorted(actor_counts.items(), key=lambda x: x[1], reverse=True)
+
+        # Sample data (simplified)
+        sample_data = []
+        for p in perceptions[:5]:
+            sample_data.append({
                 'mechanisms': p.get('mechanisms', []),
-                'actor': p.get('actor', {}).get('subject', ''),
-                'purpose': p.get('actor', {}).get('purpose', ''),
-                'pattern': p.get('consistency_pattern', ''),
-                'logic_chain': p.get('logic_chain', [])[:3]
+                'actor': p.get('actor', {}),
+                'logic_chain': p.get('logic_chain', [])[:3] if p.get('logic_chain') else []
             })
 
         prompt = f"""
-다음은 DC Gallery 정치 글 {len(summary_data)}개의 추론 구조 분석 결과입니다.
+{len(perceptions)}개 담론 통계 분석:
 
-{json.dumps(summary_data, ensure_ascii=False, indent=1)}
+## 메커니즘 빈도
+{json.dumps(top_mechs, ensure_ascii=False, indent=2)}
 
-이 데이터를 분석해서 **5-10개의 핵심 세계관**을 추출해주세요.
+## Actor 빈도
+{json.dumps(top_actors, ensure_ascii=False, indent=2)}
 
-**요구사항:**
+## Logic Chain 시작점 샘플 (10개)
+{json.dumps(logic_chain_samples[:10], ensure_ascii=False, indent=2)}
 
-1. 각 세계관은 **추론 메커니즘 기반**이어야 합니다 (주제가 아님)
-   - 좋은 예: "민주당의 어떤 행동도 독재 시도로 해석하는 구조"
-   - 나쁜 예: "민주당에 대한 인식" (이건 주제임)
+전체 데이터 샘플:
+{json.dumps(sample_data, ensure_ascii=False, indent=2)}
 
-2. 각 세계관은 **다양한 사건에 적용 가능**해야 합니다
-   - 유심교체, 집회제한, 법안발의 등 전혀 다른 사건에도 같은 논리 적용
+---
 
-3. 행위자 중심으로 분류:
-   - 민주당/좌파에 대한 해석
-   - 중국에 대한 해석
-   - 언론/사법부에 대한 해석
-   - 보수 진영 자신들에 대한 해석
+## 데이터 기반 세계관 발견
 
-4. 각 세계관마다:
-   - 핵심 메커니즘 (즉시_단정, 필연적_인과 등)
-   - 행위자
-   - 추정 목적
-   - 논리 구조 (A → B → C)
+### 분석 기준
+
+1. **유의미한 공출현**: 어떤 메커니즘들이 자주 함께 나타나는가?
+2. **지배적 Actor**: 가장 자주 언급되는 Actor는?
+3. **공통 Logic 패턴**: Logic Chain 시작점의 공통점은?
+
+### 세계관 정의
+
+위 통계를 바탕으로 **5-10개의 핵심 세계관**을 정의하세요.
+
+⚠️ 주의: 단순 빈도가 아닌 **의미있는 조합**을 찾으세요.
+
+## 🎯 세계관 제목 작성 원칙 (매우 중요!)
+
+**DC Gallery 사용자들의 실제 언어와 시각**으로 표현하세요.
+
+❌ 나쁜 예 (학술적/객관적 표현):
+- "즉시 단정형 음모론 세계관"
+- "역사 반복 필연론 세계관"
+- "외부 세력 침투론 세계관"
+
+✅ 좋은 예 (그들의 언어로):
+- "중국/좌파가 댓글부대로 여론을 조작한다"
+- "민주당은 과거 독재처럼 사찰로 국민을 감시한다"
+- "이재명은 네트워크로 권력을 유지한다"
+- "정부는 권력을 악용해 국민을 탄압한다"
+- "언론은 진실을 왜곡하여 조작한다"
+
+**형식**: "[행위자]는/가 [행동]한다" (30-50자)
+**톤**: DC Gallery 사용자가 직접 말하는 것처럼
 
 JSON 형식:
 {{
   "worldviews": [
     {{
-      "title": "민주당/좌파의 정보 파악 → 즉시 불법/사찰로 해석",
-      "actor": "민주당/좌파",
-      "core_mechanisms": ["즉시_단정", "역사_투사"],
-      "logic_pattern": {{
-        "trigger": "민주당이 어떤 정보를 알고 있음",
-        "skipped_verification": ["정보 출처 확인", "합법 가능성"],
-        "conclusion": "불법 사찰 및 독재 시도"
+      "title": "세계관 제목 - DC 사용자 언어로 (30-50자)",
+      "description": "핵심 특징 (2-3문장)",
+      "actor": {{
+        "subject": "주체",
+        "purpose": "목적",
+        "methods": ["수단1", "수단2", "수단3"]
       }},
-      "examples": ["유심교체 정보", "집회 정보"],
-      "estimated_coverage_pct": 15
+      "core_mechanisms": ["메커니즘1", "메커니즘2", "메커니즘3"],
+      "logic_pattern": {{
+        "trigger": "시작",
+        "skipped_verification": "생략",
+        "conclusion": "결론"
+      }},
+      "statistical_basis": {{
+        "top_mechanisms": ["메커니즘들"],
+        "top_actor": "Actor",
+        "occurrence_count": 숫자
+      }}
     }}
   ]
 }}
-
-**중요:** 통합 시 특정성을 잃지 마세요. 각 세계관은 구체적인 논리 패턴을 가져야 합니다.
 """
 
-        print("\n🤖 GPT-5로 세계관 클러스터링 중...")
+        print("\n🤖 Claude로 세계관 발견 중 (Data-Driven)...")
 
-        response = await client.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {"role": "system", "content": "You are an expert in cognitive structure analysis. Always respond in valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"}
+        # Claude Sonnet 4.5 (Data-Driven 프롬프트)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=8192,
+                temperature=0.3,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
         )
 
-        result = json.loads(response.choices[0].message.content)
+        response_text = response.content[0].text
+
+        # Parse JSON
+        if "```json" in response_text:
+            json_start = response_text.find("```json") + 7
+            json_end = response_text.find("```", json_start)
+            json_str = response_text[json_start:json_end].strip()
+        elif "{" in response_text:
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
+            json_str = response_text[json_start:json_end]
+        else:
+            json_str = response_text
+
+        result = json.loads(json_str)
         worldviews = result.get('worldviews', [])
 
         # Print summary
@@ -251,16 +326,35 @@ JSON 형식:
 }}
 """
 
-        response = await client.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {"role": "system", "content": "You are an expert in comparing worldview structures. Always respond in valid JSON."},
-                {"role": "user", "content": comparison_prompt}
-            ],
-            response_format={"type": "json_object"}
+        # Claude Sonnet 4.5
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=4096,
+                temperature=0,
+                messages=[
+                    {"role": "user", "content": comparison_prompt}
+                ]
+            )
         )
 
-        changes = json.loads(response.choices[0].message.content)
+        response_text = response.content[0].text
+
+        # Parse JSON
+        if "```json" in response_text:
+            json_start = response_text.find("```json") + 7
+            json_end = response_text.find("```", json_start)
+            json_str = response_text[json_start:json_end].strip()
+        elif "{" in response_text:
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
+            json_str = response_text[json_start:json_end]
+        else:
+            json_str = response_text
+
+        changes = json.loads(json_str)
 
         # Add actual worldview objects
         changes['new_worldview_objects'] = [

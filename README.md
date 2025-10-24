@@ -7,11 +7,12 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 
-**🎉 v2.0 배포 완료 (2025-10-12): 메커니즘 기반 살아있는 세계관 시스템**
-- ✅ 501개 perception 분석 완료 (5개 핵심 메커니즘 추출)
-- ✅ 9개 v2.0 세계관 생성 및 운영 중
-- ✅ 910개 perception-worldview 링크 (84.2% 커버리지)
-- ✅ Dashboard 운영: http://localhost:3000
+**🎉 v2.0 Claude Migration 완료 (2025-10-23): Claude Sonnet 4.5 기반 프로덕션 시스템**
+- ✅ 499개 perception 분석 완료 (100% mechanism detection)
+- ✅ 7개 활성 세계관 운영 중 (data-driven discovery)
+- ✅ 541개 perception-worldview links (adaptive weighting)
+- ✅ Claude Sonnet 4.5로 완전 마이그레이션 (GPT 대비 +150% quality)
+- 📊 Dashboard: https://dc-monitor-dashboard.vercel.app
 
 ---
 
@@ -198,69 +199,91 @@ graph TB
     F -.->|구성| D
 ```
 
-### 주요 컴포넌트 (v2.0)
+### 주요 컴포넌트 (v2.0 - Claude Powered)
 
-#### 1. ReasoningStructureExtractor ✨ NEW
-각 글의 추론 구조 분석
-- 5개 메커니즘 자동 추출
-- GPT-4o 활용 (빠름)
-- 비용: ~$0.05/글
+#### 1. LayeredPerceptionExtractor
+3-layer 담론 분석 (Explicit → Implicit → Deep)
+- **Claude Sonnet 4.5** 활용
+- **Baseline 전략**: "Less is More" (30줄 프롬프트)
+- 품질: 4/5/5 items per layer (+150% vs GPT)
 
-#### 2. WorldviewEvolutionEngine ✨ NEW
-살아있는 세계관 시스템
-- 주기적 자동 업데이트
-- 변화 감지 및 추적
-- GPT-5 활용 (정확함)
+#### 2. ReasoningStructureExtractor
+추론 구조 분석 (5 mechanisms + actor + logic_chain)
+- **Claude Sonnet 4.5** 활용
+- **StepByStep 전략**: Checklist 기반 progressive guidance
+- 성능: 100% mechanism detection (vs 60-80% GPT)
 
-#### 3. MechanismMatcher ✨ NEW
-메커니즘 기반 매칭
-- Actor (50%) + Mechanism (30%) + Logic (20%)
-- 해석 가능한 점수
-- 기존 임베딩 방식 대체
+#### 3. WorldviewEvolutionEngine
+Data-driven 세계관 자동 발견 및 진화 추적
+- **Claude Sonnet 4.5** 활용
+- **Data-Driven 전략**: 통계 기반 패턴 발견
+- 주간 evolution cycle (200 recent perceptions)
 
-#### 4. Dashboard (업데이트 예정)
-세계관 탐색 + 진화 추적 UI
-- 메커니즘 분포 차트
-- 세계관 진화 타임라인
-- 실시간 담론 변화 추적
+#### 4. MechanismMatcher
+Adaptive 가중치 매칭 알고리즘
+- Actor/Mechanism/Logic 가중치 동적 조정
+- 일반: Actor 50% / 극단적 사건: Mechanism 50%
+- 해석 가능한 점수 (threshold 0.6)
+
+#### 5. Dashboard (Next.js 14)
+Actor-centric 세계관 시각화
+- **Production**: https://dc-monitor-dashboard.vercel.app
+- 메커니즘 분포 및 논리 체인 시각화
+- Vercel 자동 배포
 
 ---
 
 ## 🚀 빠른 시작
 
-### v2.0 시스템 배포
+### v2.0 Claude System (프로덕션 준비 완료)
 
-**1. Schema Migration**
+**1. 환경 설정**
 ```bash
-# Supabase Dashboard에서 SQL 실행
-# supabase/migrations/301_add_reasoning_structure_fields.sql
+# Python 환경
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 환경 변수 (.env)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-key
+ANTHROPIC_API_KEY=sk-ant-api03-...
 ```
 
-**2. 데이터 마이그레이션**
+**2. 새 게시글 수집 및 분석**
 ```bash
-python scripts/migrate_to_new_system.py
+# 1. DC Gallery 수집
+python3 scripts/collect_500_posts.py
 
-# 이 스크립트는:
-# - 501개 perception에 reasoning structure 추가
-# - 기존 세계관 아카이브
-# - 새 9개 세계관 생성
-# - Mechanism 기반 재매칭
+# 2. 3-layer perception 추출
+python3 scripts/process_new_content.py
+
+# 3. 주간 evolution (매주 월요일 권장)
+python3 scripts/run_worldview_evolution.py
+
+# 4. Perception-Worldview 매칭
+python3 scripts/run_mechanism_matcher.py
 ```
 
-**3. 일상 운영**
+**3. 대시보드 실행**
 ```bash
-# 새 content 처리
-python scripts/process_new_content.py
+cd dashboard
+npm install
 
-# 주간 세계관 업데이트 (매주 일요일)
-python scripts/run_worldview_evolution.py
+# Dev server
+npm run dev  # http://localhost:3000
+
+# Production (Vercel)
+npm run build
+vercel deploy
 ```
 
-### 상세 가이드
+### 주요 문서
 
-- [SYSTEM_TRANSITION_PLAN.md](SYSTEM_TRANSITION_PLAN.md) - 전환 계획
-- [NEW_SYSTEM_ARCHITECTURE.md](NEW_SYSTEM_ARCHITECTURE.md) - 아키텍처
-- [PROJECT_COMPLETE.md](PROJECT_COMPLETE.md) - 완료 보고서
+- **[PROJECT_STATUS_FINAL.md](PROJECT_STATUS_FINAL.md)** - 전체 프로젝트 상태
+- **[CLAUDE_MIGRATION_COMPLETE.md](CLAUDE_MIGRATION_COMPLETE.md)** - Claude 마이그레이션 가이드
+- **[CLAUDE.md](CLAUDE.md)** - 개발 가이드 (Claude Code용)
+- **[docs/analysis/](docs/analysis/)** - 17개 실험 결과 및 분석
 
 ---
 
@@ -281,55 +304,25 @@ cd dashboard
 npm install
 ```
 
-### 환경변수
+### Claude Migration Details
 
-```bash
-# .env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-key
-OPENAI_API_KEY=your-openai-api-key
-OPENAI_API_KEY=sk-proj-...
+**Before (GPT-4o/GPT-5)**:
+- Perception quality: 2/2/2 items per layer
+- Mechanism detection: 60-80%
+- Worldview discovery: Topic-based (predefined)
+- Matching: Fixed weights
 
-# dashboard/.env.local
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
+**After (Claude Sonnet 4.5)**:
+- Perception quality: 4/5/5 items per layer (+150%)
+- Mechanism detection: 100%
+- Worldview discovery: Data-driven (emergent)
+- Matching: Adaptive weights (context-aware)
 
-### 3. 실행
-
-```bash
-# 1. 데이터 수집 (예: DC Gallery)
-python scripts/collect_500_posts.py
-
-# 2. 3-Layer 분석
-python -c "
-import asyncio
-from engines.analyzers.layered_perception_extractor import LayeredPerceptionExtractor
-
-async def main():
-    extractor = LayeredPerceptionExtractor()
-    # 수집된 데이터 분석
-
-asyncio.run(main())
-"
-
-# 3. 세계관 자동 구성
-python -c "
-import asyncio
-from engines.analyzers.optimal_worldview_constructor import OptimalWorldviewConstructor
-
-async def main():
-    constructor = OptimalWorldviewConstructor()
-    await constructor.build_hierarchical_worldviews()
-
-asyncio.run(main())
-"
-
-# 4. 대시보드
-cd dashboard
-npm run dev
-# http://localhost:3000
-```
+**Migration Achievements**:
+- 17 experiments conducted across 4 components
+- 6 detailed analysis documents created
+- Optimal prompt strategies identified
+- Production deployment completed
 
 ---
 
@@ -391,17 +384,26 @@ npm run dev
 }
 ```
 
-### 통계
+### 통계 (v2.0 기준, 2025-10-23)
 
-- **원본 글**: 297개
-- **분석 완료**: 297개 (3-Layer)
-- **발견된 세계관**: 6개 (계층형)
-- **세계관별 분포**:
-  - 중국의 부정적 영향: 10개
-  - 좌파의 사회적 위협: 7개
-  - 독재 재현: 5개
-  - 북한의 지속적 위협: 3개
-  - 사법부와 언론의 결탁: 1개
+| 항목 | 수량 | 비고 |
+|------|------|------|
+| **Contents** | 456개 | DC Gallery 원문 |
+| **Layered Perceptions** | 499개 | 3-layer 분석 완료 |
+| **Mechanism Coverage** | 100% | 5개 메커니즘 추출 |
+| **Active Worldviews** | 7개 | Data-driven discovery |
+| **Archived Worldviews** | 56개 | 진화 추적 시스템 |
+| **Perception Links** | 541개 | Adaptive matching |
+
+### Active Worldviews (7개)
+
+1. **외세가 댓글부대로 여론을 조작한다** - 158 perceptions
+2. **민주당은 불법 사찰로 국민을 감시한다** - 125 perceptions
+3. **정부는 권력을 악용해 국민을 탄압한다** - 77 perceptions
+4. **보수는 민심의 진정한 척도이다** - 71 perceptions
+5. **중국은 조직적 침투로 한국을 장악한다** - 61 perceptions
+6. **언론은 진실을 왜곡하여 조작한다** - 30 perceptions
+7. **정부는 진실을 조작해 국민을 속인다** - 20 perceptions
 
 ---
 
@@ -409,57 +411,74 @@ npm run dev
 
 ### 기술 스택
 
-**백엔드**
+**백엔드 (Python)**
 - Python 3.11+ (asyncio)
-- OpenAI GPT-4o / GPT-4o-mini
+- **Anthropic Claude Sonnet 4.5** (프로덕션 AI 엔진)
 - Supabase (PostgreSQL + pgvector)
+- python-dotenv (환경 관리)
 
-**프론트엔드**
+**프론트엔드 (TypeScript)**
 - Next.js 14 (App Router)
 - TypeScript
 - TailwindCSS
+- Lucide React (아이콘)
 
 **인프라**
-- GitHub Actions (자동화)
-- Vercel (배포)
+- Supabase (Database + Auth)
+- Vercel (Dashboard 배포)
+- GitHub (버전 관리)
 
-### 데이터베이스 스키마
+### 데이터베이스 스키마 (v2.0 Clean)
+
+**4 Tables Only** (12개 deprecated tables 정리 완료)
 
 ```sql
--- 원본 글
+-- 원본 게시글
 CREATE TABLE contents (
     id UUID PRIMARY KEY,
     title TEXT,
     body TEXT,
     source_url TEXT,
-    published_at TIMESTAMPTZ
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3-Layer 분석 결과
+-- 3-layer 분석 + v2.0 추론 구조
 CREATE TABLE layered_perceptions (
     id UUID PRIMARY KEY,
     content_id UUID REFERENCES contents(id),
+    -- 3-layer 구조
     explicit_claims JSONB,
     implicit_assumptions JSONB,
     deep_beliefs JSONB,
-    worldview_hints TEXT
+    -- v2.0 추론 구조 (Claude extracted)
+    mechanisms TEXT[],           -- 5 mechanism types
+    actor JSONB,                 -- {subject, purpose, methods}
+    logic_chain JSONB[],         -- reasoning steps
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 세계관
+-- 세계관 (data-driven discovery)
 CREATE TABLE worldviews (
     id UUID PRIMARY KEY,
     title TEXT,
-    frame JSONB,  -- { category, subcategory, narrative, metadata }
-    strength_overall FLOAT,
-    total_perceptions INT
+    description TEXT,
+    frame JSONB,                 -- v2.0 structure
+    core_subject TEXT,           -- Actor subject
+    core_attributes TEXT[],      -- Mechanisms
+    version INT DEFAULT 1,
+    archived BOOLEAN DEFAULT FALSE,
+    total_perceptions INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- perception ↔ worldview 연결
+-- 매칭 링크 (adaptive scoring)
 CREATE TABLE perception_worldview_links (
     id UUID PRIMARY KEY,
     perception_id UUID REFERENCES layered_perceptions(id),
     worldview_id UUID REFERENCES worldviews(id),
-    relevance_score FLOAT
+    match_score FLOAT,           -- Actor(50%) + Mechanism(30%) + Logic(20%)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
@@ -467,25 +486,31 @@ CREATE TABLE perception_worldview_links (
 
 ```
 moniterdc/
-├── engines/                    # 핵심 분석 엔진
-│   ├── analyzers/
-│   │   ├── layered_perception_extractor.py  # 3-Layer 분석
-│   │   ├── optimal_worldview_constructor.py # 세계관 자동 발견
-│   │   ├── hybrid_perception_matcher.py     # 매칭 엔진
-│   │   └── worldview_updater.py            # 자동 업데이트
+├── engines/                           # Python 분석 엔진
+│   ├── analyzers/                     # 4개 핵심 (Claude)
+│   │   ├── layered_perception_extractor.py    # 3-layer (Baseline)
+│   │   ├── reasoning_structure_extractor.py   # mechanisms (StepByStep)
+│   │   ├── worldview_evolution_engine.py      # discovery (Data-Driven)
+│   │   └── mechanism_matcher.py               # adaptive matching
 │   ├── collectors/
-│   │   └── content_collector.py            # 데이터 수집
+│   │   └── content_collector.py               # DC Gallery 크롤링
 │   └── utils/
+│       └── supabase_client.py                 # DB 클라이언트
 │
-├── dashboard/                  # Next.js 대시보드
+├── dashboard/                         # Next.js 14
 │   ├── app/
-│   │   ├── page.tsx           # 메인: 세계관 맵
-│   │   └── worldviews/[id]/page.tsx  # 상세
-│   └── components/
+│   │   ├── page.tsx                           # ActorCentricWorldviewMap
+│   │   └── worldviews/[id]/page.tsx          # Detail page
+│   └── components/worldviews/                 # 5개 컴포넌트
 │
-├── supabase/migrations/        # DB 스키마
+├── scripts/                           # 실행 스크립트 (23개)
+├── supabase/migrations/               # DB 마이그레이션 (23개)
+├── docs/analysis/                     # 실험 결과 (6개)
 │
-└── scripts/                    # 실행 스크립트
+├── CLAUDE.md                          # 개발 가이드
+├── CLAUDE_MIGRATION_COMPLETE.md       # 마이그레이션
+├── PROJECT_STATUS_FINAL.md            # 프로젝트 상태
+└── README.md                          # 이 파일
 ```
 
 ---
@@ -644,9 +669,11 @@ MIT License - 자유롭게 사용, 수정, 배포 가능
 ## 🙏 감사의 말
 
 이 프로젝트는 다음 기술과 철학을 기반으로 합니다:
-- OpenAI GPT-4o (분석 엔진)
-- Supabase (데이터 저장)
-- Next.js (시각화)
+- **Anthropic Claude Sonnet 4.5** (프로덕션 AI 엔진)
+- OpenAI GPT-4o/GPT-5 (초기 프로토타입)
+- Supabase (PostgreSQL + pgvector)
+- Next.js 14 (대시보드)
+- Vercel (배포 플랫폼)
 - **"이해는 동의가 아니다. 이해는 대화의 시작이다"**
 
 ---
@@ -655,4 +682,6 @@ MIT License - 자유롭게 사용, 수정, 배포 가능
 
 *"The goal is not to prove who is right, but to understand why we see differently"*
 
-Last Updated: 2025-01-05
+**Last Updated**: 2025-10-23
+**Version**: v2.0 (Claude Migration Complete)
+**Status**: ✅ Production Ready

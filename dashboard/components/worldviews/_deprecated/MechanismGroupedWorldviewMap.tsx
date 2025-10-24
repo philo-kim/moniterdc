@@ -10,7 +10,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, Users, TrendingUp, Brain } from 'lucide-react'
 import Link from 'next/link'
-import { MechanismList, type MechanismType, MechanismBadge } from './MechanismBadge'
+import { MechanismList, type MechanismType, MechanismBadge } from '../MechanismBadge'
 
 interface Worldview {
   id: string

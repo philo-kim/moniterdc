@@ -1,0 +1,78 @@
+name: Daily Maintenance
+
+on:
+  schedule:
+    # 매일 UTC 18:00 (한국시간 새벽 3시)
+    - cron: '0 18 * * *'
+
+  workflow_dispatch:  # 수동 실행도 가능
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  daily_maintenance:
+    name: Daily Maintenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Daily Maintenance
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        python scripts/daily_maintenance.py
+
+    - name: Generate Report
+      if: always()
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        echo "## 🔧 Daily Maintenance Report" >> $GITHUB_STEP_SUMMARY
+        echo "Time: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        python -c "
+        from engines.archiving import ContentArchiver
+        from engines.utils.supabase_client import get_supabase
+
+        archiver = ContentArchiver()
+        stats = archiver.get_archive_stats()
+        supabase = get_supabase()
+
+        # Worldviews
+        worldviews = supabase.table('worldviews').select('id, title').eq('archived', False).execute()
+
+        # Lifecycle snapshots
+        from datetime import date
+        today = date.today().isoformat()
+        wv_snapshots = supabase.table('worldview_history').select('id').eq('snapshot_date', today).execute()
+        pattern_snapshots = supabase.table('pattern_snapshots').select('id').eq('snapshot_date', today).execute()
+
+        print('### 📊 시스템 상태')
+        print(f'- Active contents: {stats[\"active_contents\"]:,}개')
+        print(f'- Archived contents: {stats[\"archived_contents\"]:,}개')
+        print(f'- Active perceptions: {stats[\"active_perceptions\"]:,}개')
+        print(f'- Archived perceptions: {stats[\"archived_perceptions\"]:,}개')
+        print(f'- Active worldviews: {len(worldviews.data)}개')
+        print('')
+        print('### 📸 오늘 스냅샷')
+        print(f'- Worldview snapshots: {len(wv_snapshots.data)}개')
+        print(f'- Pattern snapshots: {len(pattern_snapshots.data)}개')
+        " >> $GITHUB_STEP_SUMMARY

@@ -1,17 +1,17 @@
 """
-Analyzers package - NEW schema only
+Analyzers package - v2.0 clean architecture with dynamic pattern management
 """
 
 from .layered_perception_extractor import LayeredPerceptionExtractor
-from .optimal_worldview_constructor import OptimalWorldviewConstructor
-from .worldview_updater import WorldviewUpdater
-from .belief_normalizer import BeliefNormalizer
-from .context_guide_builder import ContextGuideBuilder
+from .reasoning_structure_extractor import ReasoningStructureExtractor
+from .worldview_evolution_engine import WorldviewEvolutionEngine
+from .mechanism_matcher import MechanismMatcher
+from .pattern_manager import PatternManager
 
 __all__ = [
     'LayeredPerceptionExtractor',
-    'OptimalWorldviewConstructor',
-    'WorldviewUpdater',
-    'BeliefNormalizer',
-    'ContextGuideBuilder'
+    'ReasoningStructureExtractor',
+    'WorldviewEvolutionEngine',
+    'MechanismMatcher',
+    'PatternManager'
 ]
