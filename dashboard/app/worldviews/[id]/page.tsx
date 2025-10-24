@@ -284,97 +284,60 @@ export default function WorldviewDetailPage() {
           </div>
         </div>
 
-        {/* 🎯 핵심 구조: 세계관 레벨 논리 패턴 */}
-        {worldview.logic_chain && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <Brain className="h-6 w-6 text-purple-600" />
-              논리 구조: 어떻게 이 생각에 도달했는가?
-            </h2>
-            <p className="text-sm text-slate-600 mb-6">
-              {layeredPerceptions.length}개 담론에서 추출한 공통 사고 패턴
-            </p>
+        {/* 🎯 3층 구조 설명 */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+          <h2 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+            <Layers className="h-6 w-6 text-purple-600" />
+            세계관의 3층 구조: 표면 → 암시 → 믿음
+          </h2>
+          <p className="text-sm text-slate-600 mb-6">
+            이 세계관을 가진 사람들은 표면적 사실에서 시작해, 암묵적 감정/전제를 거쳐, 무의식적 근본 믿음에 도달합니다.
+          </p>
 
-            <div className="space-y-4">
-              {/* Trigger */}
-              {worldview.logic_chain.trigger && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-200">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-blue-900 mb-1">출발점 (Trigger)</p>
-                      <p className="text-slate-800">{worldview.logic_chain.trigger}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Skipped Verification */}
-              {worldview.logic_chain.skipped_verification && (
-                <>
-                  <div className="flex justify-center">
-                    <div className="text-amber-600 text-2xl font-bold">↓</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border-2 border-amber-300">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-amber-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                        ⚠
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-amber-900 mb-2">건너뛴 검증 단계</p>
-                        <p className="text-xs text-amber-800 mb-3 italic">
-                          이런 가능성들은 고려하지 않고 바로 결론으로 넘어갑니다
-                        </p>
-                        {/* Handle both string and array formats */}
-                        {Array.isArray(worldview.logic_chain.skipped_verification) ? (
-                          <ul className="space-y-2">
-                            {worldview.logic_chain.skipped_verification.map((skip: string, i: number) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="text-amber-600 mt-1">▸</span>
-                                <span className="text-slate-800 text-sm">{skip}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-slate-800">{worldview.logic_chain.skipped_verification}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Conclusion */}
-              {worldview.logic_chain.conclusion && (
-                <>
-                  <div className="flex justify-center">
-                    <div className="text-purple-600 text-2xl font-bold">↓</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border-2 border-purple-300">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                        2
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-purple-900 mb-1">결론 (Conclusion)</p>
-                        <p className="text-slate-800 font-medium">{worldview.logic_chain.conclusion}</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Layer 1: 표면 (사실) */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-5 border-2 border-blue-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Eye className="h-5 w-5 text-blue-600" />
+                <p className="font-bold text-blue-900">표면층</p>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">사실 주장</p>
+              <p className="text-sm text-slate-700">
+                직접적으로 말하는 것. 객관적 사실처럼 제시되는 주장들.
+              </p>
             </div>
 
-            <div className="mt-6 bg-slate-50 rounded-lg p-4 border border-slate-200">
-              <p className="text-xs text-slate-600 leading-relaxed">
-                💡 <strong>이 논리 구조는</strong> 개별 글 하나가 아닌, {layeredPerceptions.length}개 담론에서 반복적으로 나타나는 <strong>공통 사고 패턴</strong>입니다.
-                개별 사례의 구체적인 분석은 아래 &ldquo;대표 사례&rdquo; 목록에서 확인할 수 있습니다.
+            {/* Layer 2: 암시 (감정) */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-5 border-2 border-amber-300">
+              <div className="flex items-center gap-2 mb-3">
+                <Brain className="h-5 w-5 text-amber-600" />
+                <p className="font-bold text-amber-900">암묵층</p>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">감정/전제</p>
+              <p className="text-sm text-slate-700">
+                말하지 않지만 깔려있는 전제와 감정. 당연하게 여기는 가정들.
+              </p>
+            </div>
+
+            {/* Layer 3: 믿음 (무의식) */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-5 border-2 border-red-300">
+              <div className="flex items-center gap-2 mb-3">
+                <Heart className="h-5 w-5 text-red-600" />
+                <p className="font-bold text-red-900">심층</p>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">근본 믿음</p>
+              <p className="text-sm text-slate-700">
+                의식하지 못하는 세계관. 모든 해석의 기반이 되는 무의식적 믿음.
               </p>
             </div>
           </div>
-        )}
+
+          <div className="mt-4 bg-slate-50 rounded-lg p-4 border border-slate-200">
+            <p className="text-xs text-slate-600 leading-relaxed">
+              💡 아래 &ldquo;대표 사례&rdquo;에서 각 글이 이 3층 구조를 어떻게 보여주는지 확인할 수 있습니다.
+            </p>
+          </div>
+        </div>
 
         {/* 🔍 해석 차이 비교 */}
         {frame.narrative?.examples && frame.narrative.examples.length > 0 && (
