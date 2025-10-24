@@ -108,8 +108,13 @@ class DCGalleryAdapter(BaseAdapter):
             logger.error(f"Error fetching DC gallery {gallery}: {e}")
             return all_posts  # Return what we got so far
 
-    async def fetch_post_content(self, post_url: str) -> str:
-        """Fetch full content of a post"""
+    async def fetch_post_content(self, post_url: str) -> Dict:
+        """
+        Fetch full content and metadata of a post
+
+        Returns:
+            Dict with 'body', 'published_at', 'author', 'view_count', 'comment_count', 'recommend_count'
+        """
         try:
             async with aiohttp.ClientSession() as session:
                 headers = {
@@ -118,21 +123,79 @@ class DCGalleryAdapter(BaseAdapter):
 
                 async with session.get(post_url, headers=headers, timeout=10) as response:
                     if response.status != 200:
-                        return ""
+                        return {"body": ""}
 
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
 
+                    # Content
                     content_div = soup.select_one('.write_div')
-                    if not content_div:
-                        return ""
+                    body = content_div.get_text(strip=True, separator='\n') if content_div else ""
 
-                    content = content_div.get_text(strip=True, separator='\n')
-                    return content
+                    # Extract from JSON-LD (most reliable)
+                    published_at = None
+                    view_count = None
+                    comment_count = None
+
+                    script_tags = soup.find_all('script', type='application/ld+json')
+                    for script in script_tags:
+                        import json
+                        try:
+                            data = json.loads(script.string)
+
+                            # Published date
+                            if 'datePublished' in data:
+                                published_at = data['datePublished']
+
+                            # Interaction counts
+                            if 'interactionStatistic' in data:
+                                for stat in data['interactionStatistic']:
+                                    interaction_type = stat.get('interactionType', '')
+                                    count = stat.get('userInteractionCount')
+
+                                    if 'ViewAction' in interaction_type:
+                                        view_count = int(count) if count else None
+                                    elif 'CommentAction' in interaction_type:
+                                        comment_count = int(count) if count else None
+
+                        except:
+                            continue
+
+                    # Fallback: HTML에서 추출
+                    if not published_at:
+                        date_span = soup.select_one('.gall_date')
+                        if date_span and date_span.get('title'):
+                            # "2025-09-25 02:36:06" -> ISO format
+                            date_str = date_span['title']
+                            published_at = date_str.replace(' ', 'T') + '+09:00'
+
+                    # Author
+                    author = None
+                    nickname_elem = soup.select_one('.nickname em')
+                    if nickname_elem:
+                        author = nickname_elem.get_text(strip=True)
+
+                    # Recommend count
+                    recommend_count = None
+                    recommend_elem = soup.select_one('.up_num')
+                    if recommend_elem:
+                        try:
+                            recommend_count = int(recommend_elem.get_text(strip=True).replace(',', ''))
+                        except:
+                            pass
+
+                    return {
+                        'body': body,
+                        'published_at': published_at,
+                        'author': author,
+                        'view_count': view_count,
+                        'comment_count': comment_count,
+                        'recommend_count': recommend_count
+                    }
 
         except Exception as e:
             logger.error(f"Error fetching content from {post_url}: {e}")
-            return ""
+            return {"body": ""}
 
     def parse(self, raw: Dict) -> ParsedContent:
         """

@@ -58,13 +58,34 @@ class ContentCollector:
                     logger.info(f"Content already exists: {parsed.url}")
                     continue
 
-                # 4. For DC gallery, fetch full content
+                # 4. For DC gallery, fetch full content + metadata
                 if source_type == 'dc_gallery':
-                    body = await adapter.fetch_post_content(parsed.url)
-                    if not body:
+                    post_data = await adapter.fetch_post_content(parsed.url)
+                    if not post_data.get('body'):
                         logger.warning(f"Failed to fetch content for {parsed.url}")
                         continue
-                    parsed.body = body
+
+                    parsed.body = post_data['body']
+
+                    # Update published_at if available
+                    if post_data.get('published_at'):
+                        # Parse ISO format string to datetime
+                        from dateutil import parser as date_parser
+                        try:
+                            parsed.published_at = date_parser.parse(post_data['published_at'])
+                        except:
+                            parsed.published_at = None
+
+                    # Add metadata
+                    if not parsed.metadata:
+                        parsed.metadata = {}
+
+                    parsed.metadata.update({
+                        'author': post_data.get('author'),
+                        'view_count': post_data.get('view_count'),
+                        'comment_count': post_data.get('comment_count'),
+                        'recommend_count': post_data.get('recommend_count')
+                    })
 
                 # 5. Save content
                 content_id = await self.save_content(
