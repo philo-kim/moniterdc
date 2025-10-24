@@ -29,44 +29,37 @@ async def main():
 
     supabase = get_supabase()
 
-    # Step 1: 최근 30분간 새로 수집된 contents 찾기
-    since = (datetime.now() - timedelta(minutes=30)).isoformat()
-
-    result = supabase.table('contents')\
+    # Step 1: perception이 없는 모든 contents 찾기
+    # 먼저 모든 contents 가져오기
+    all_contents = supabase.table('contents')\
         .select('id, title, body')\
-        .gte('created_at', since)\
-        .is_('body', 'not.null')\
+        .not_.is_('body', 'null')\
         .neq('body', '')\
         .execute()
 
-    new_contents = result.data
+    # 이미 처리된 content_ids
+    processed = supabase.table('layered_perceptions')\
+        .select('content_id')\
+        .execute()
+
+    processed_ids = {p['content_id'] for p in processed.data}
+
+    # 처리되지 않은 contents만 필터링
+    new_contents = [c for c in all_contents.data if c['id'] not in processed_ids]
 
     if not new_contents:
         print("✅ No new contents to process")
         return
 
-    print(f"Found {len(new_contents)} new contents to process\n")
+    print(f"Processing {len(new_contents)} unprocessed contents...\n")
 
-    # Step 2: 이미 처리된 것 제외
-    already_processed = supabase.table('layered_perceptions')\
-        .select('content_id')\
-        .in_('content_id', [c['id'] for c in new_contents])\
-        .execute()
-
-    processed_ids = {p['content_id'] for p in already_processed.data}
-    to_process = [c for c in new_contents if c['id'] not in processed_ids]
-
-    if not to_process:
-        print("✅ All contents already processed")
-        return
-
-    print(f"Processing {len(to_process)} unprocessed contents...\n")
+    to_process = new_contents
 
     # Step 3: Perception 추출 (v2.1 with filtering)
     extractor = LayeredPerceptionExtractorV2()
     structure_extractor = ReasoningStructureExtractor()
 
-    batch_size = 5
+    batch_size = 2  # Rate limit 회피를 위해 줄임
     total = len(to_process)
     processed = 0
 
@@ -84,6 +77,10 @@ async def main():
                 processed += 1
 
         print(f"Progress: {processed}/{total} ({processed/total*100:.1f}%)")
+
+        # Rate limit 회피를 위한 delay (10초)
+        if i + batch_size < total:
+            await asyncio.sleep(10)
 
     print(f"\n✅ Perception extraction complete: {processed} perceptions created")
 
